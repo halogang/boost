@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 
 interface MenuItem {
   id: number;
@@ -10,25 +11,19 @@ interface MenuItem {
   parent_id: number | null;
   order: number;
   active: boolean;
-  children: MenuItem[];
+  children?: MenuItem[];
 }
 
 export default function Sidebar() {
-  const [menus, setMenus] = useState<MenuItem[]>([]);
+  const { props, url } = usePage<any>();
   const [expandedMenus, setExpandedMenus] = useState<number[]>([]);
 
-  useEffect(() => {
-    fetchMenus();
-  }, []);
+  // Get sidebar menus from Inertia share
+  const menus = props.navigation?.sidebar || [];
 
-  const fetchMenus = async () => {
-    try {
-      const response = await fetch('/api/menus');
-      const data = await response.json();
-      setMenus(data);
-    } catch (error) {
-      console.error('Failed to fetch menus:', error);
-    }
+  const isActive = (route: string | null) => {
+    if (!route) return false;
+    return url.startsWith(`/${route}`);
   };
 
   const toggleSubmenu = (menuId: number) => {
@@ -54,7 +49,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-gray-900 text-white min-h-screen flex flex-col">
+    <aside className="hidden md:flex w-64 bg-gray-900 text-white min-h-screen flex-col">
       {/* Logo */}
       <div className="p-6 border-b border-gray-700">
         <div className="flex items-center gap-3">
@@ -70,14 +65,18 @@ export default function Sidebar() {
 
       {/* Menus */}
       <nav className="flex-1 p-4 overflow-y-auto">
-        {menus.map((menu) => (
+        {menus.map((menu: MenuItem) => (
           <div key={menu.id}>
             {menu.children && menu.children.length > 0 ? (
               // Menu with children (submenu group)
               <div className="mb-4">
                 <button
                   onClick={() => toggleSubmenu(menu.id)}
-                  className="w-full flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-800 transition justify-between"
+                  className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition justify-between ${
+                    menu.children.some(child => isActive(child.route))
+                      ? 'bg-blue-600 text-white'
+                      : 'hover:bg-gray-800'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,12 +99,16 @@ export default function Sidebar() {
                 {/* Submenus */}
                 {expandedMenus.includes(menu.id) && (
                   <ul className="ml-4 mt-2 space-y-1 border-l border-gray-700 pl-2">
-                    {menu.children.map((child) => (
+                    {menu.children.map((child: MenuItem) => (
                       <li key={child.id}>
                         {child.route ? (
                           <Link
-                            href={child.route}
-                            className="flex items-center gap-3 px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition"
+                            href={route(child.route)}
+                            className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${
+                              isActive(child.route)
+                                ? 'bg-blue-600 text-white font-semibold'
+                                : 'hover:bg-gray-800'
+                            }`}
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIconSvg(child.icon || 'home')} />
@@ -125,8 +128,12 @@ export default function Sidebar() {
             ) : menu.route ? (
               // Regular menu with route
               <Link
-                href={menu.route}
-                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-800 transition mb-2"
+                href={route(menu.route)}
+                className={`flex items-center gap-3 px-4 py-2 rounded-lg transition mb-2 ${
+                  isActive(menu.route)
+                    ? 'bg-blue-600 text-white font-semibold'
+                    : 'hover:bg-gray-800'
+                }`}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIconSvg(menu.icon || 'home')} />

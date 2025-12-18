@@ -16,26 +16,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Seed roles and permissions first
+        // 1. Seed roles and permissions first
         $this->call(RolePermissionSeeder::class);
         
-        // Seed menus
+        // 2. Seed menus
         $this->call(MenuSeeder::class);
 
-        // Create admin user
-        $adminUser = User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('admin123'),
-        ]);
-        $adminUser->assignRole('admin');
+        // 3. Seed menu positions
+        $this->call(MenuPositionSeeder::class);
 
-        // Create staff user
-        $staffUser = User::factory()->create([
-            'name' => 'Staff User',
-            'email' => 'staff@example.com',
-            'password' => Hash::make('staff123'),
-        ]);
-        $staffUser->assignRole('staff');
+        // 4. Seed users with roles
+        $this->call(UserSeeder::class);
     }
 }

@@ -32,12 +32,12 @@ class MenuController extends Controller
                 }
                 
                 // Filter children by permission
-                $menu->children = $menu->children->filter(function ($child) use ($user) {
+                $menu->setRelation('children', $menu->children->filter(function ($child) use ($user) {
                     if ($child->permission && !$user->hasPermissionTo($child->permission)) {
                         return false;
                     }
                     return true;
-                });
+                }));
                 
                 return true;
             })

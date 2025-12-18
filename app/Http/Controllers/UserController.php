@@ -12,18 +12,45 @@ class UserController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:read users', ['only' => ['index', 'show']]);
-        $this->middleware('permission:create users', ['only' => ['create', 'store']]);
-        $this->middleware('permission:update users', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:delete users', ['only' => ['destroy']]);
+        $this->middleware('permission:user.manage', options: ['only' => ['index', 'show','create', 'store','edit', 'update','destroy']]);
+        // $this->middleware('permission:create users', ['only' => ['create', 'store']]);
+        // $this->middleware('permission:update users', ['only' => ['edit', 'update']]);
+        // $this->middleware('permission:delete users', ['only' => ['destroy']]);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('roles')->paginate(15);
+        $perPage = $request->input('per_page', 10);
+        $search = $request->input('search', '');
+        $roleFilter = $request->input('role', '');
+
+        $users = User::with('roles')
+            ->when($search, function ($query, $search) {
+                return $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->when($roleFilter, function ($query, $roleFilter) {
+                return $query->whereHas('roles', function ($q) use ($roleFilter) {
+                    $q->where('name', $roleFilter);
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        // Get all roles for filter dropdown
+        $roles = \Spatie\Permission\Models\Role::all(['id', 'name']);
 
         return Inertia::render('Admin/Users/Index', [
             'users' => $users,
+            'roles' => $roles,
+            'filters' => [
+                'search' => $search,
+                'per_page' => (int) $perPage,
+                'role' => $roleFilter,
+            ],
         ]);
     }
 

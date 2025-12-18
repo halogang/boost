@@ -14,83 +14,87 @@ class RolePermissionSeeder extends Seeder
     public function run(): void
     {
         // Reset cached roles and permissions
-        app()['cache']->forget('spatie.permission.cache');
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Create CRUD permissions for each resource
+        // ===== CREATE PERMISSIONS =====
         $permissions = [
             // Dashboard
-            'read dashboard',
-            
+            'dashboard.view',
+
             // Orders
-            'read orders',
-            
+            'order.view',
+            'order.update_status',
+
             // Products
-            'read products',
-            'create products',
-            'update products',
-            'delete products',
-            
-            // Customers
-            'read customers',
-            'create customers',
-            'update customers',
-            'delete customers',
-            
-            // Users
-            'read users',
-            'create users',
-            'update users',
-            'delete users',
-            
-            // Permission
-            'read permission',
-            'create permission',
-            'update permission',
-            'delete permission',
-            
-            // Master Data
-            'read master data',
-            'create master data',
-            'update master data',
-            'delete master data',
-            
-            // Settings
-            'read settings',
-            'create settings',
-            'update settings',
-            'delete settings',
-            
-            // Attendance
-            'read attendance',
-            'create attendance',
-            'update attendance',
-            'delete attendance',
+            'product.view',
+            'product.create',
+            'product.update',
+            'product.delete',
+
+            // Stock
+            'stock.view',
+            'stock.adjust',
+
+            // Reports
+            'report.view',
+
+            // Notifications
+            'notification.view',
+
+            // Settings - Admin only
+            'user.manage',
+            'role.manage',
+            'system.manage',
+            'audit.view',
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Create roles
+        // ===== CREATE ROLES =====
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $ownerRole = Role::firstOrCreate(['name' => 'owner']);
         $staffRole = Role::firstOrCreate(['name' => 'staff']);
+        $courierRole = Role::firstOrCreate(['name' => 'courier']);
+        $customerRole = Role::firstOrCreate(['name' => 'customer']);
 
-        // Assign all permissions to admin
-        $adminRole->syncPermissions(Permission::all());
+        // ===== ASSIGN PERMISSIONS TO ROLES =====
 
-        // Assign limited CRUD permissions to staff
-        $staffPermissions = [
-            'read dashboard',
-            'read products',
-            'create products',
-            'update products',
-            'read attendance',
-            'create attendance',
-            'update attendance',
-            'read customers',
-            'create customers',
-            'update customers',
-        ];
-        $staffRole->syncPermissions($staffPermissions);
+        // Admin: Full access
+        $adminRole->syncPermissions($permissions);
+
+        // Owner: View-only for most resources
+        $ownerRole->syncPermissions([
+            'dashboard.view',
+            'order.view',
+            'product.view',
+            'stock.view',
+            'report.view',
+            'notification.view',
+        ]);
+
+        // Staff: Operations
+        $staffRole->syncPermissions([
+            'order.view',
+            'order.update_status',
+            'product.view',
+            'stock.view',
+            'notification.view',
+        ]);
+
+        // Courier: Orders and notifications only
+        $courierRole->syncPermissions([
+            'order.view',
+            'order.update_status',
+            'notification.view',
+        ]);
+
+        // Customer: Limited view
+        $customerRole->syncPermissions([
+            'dashboard.view',
+            'order.view',
+            'notification.view',
+        ]);
     }
 }

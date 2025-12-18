@@ -37,10 +37,12 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
+        "@tanstack/react-table": "^8.21.3",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "lucide-react": "^0.561.0",
         "tailwind-merge": "^3.4.0",
-        "tailwindcss-animate": "^1.0.7"
+        "tailwindcss-animate": "^1.0.7",
+        "ziggy-js": "^2.6.0"
     }
 }

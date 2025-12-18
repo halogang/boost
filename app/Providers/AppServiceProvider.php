@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\MenuService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
@@ -14,7 +15,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Register MenuService as singleton
+        $this->app->singleton(MenuService::class);
     }
 
     /**
@@ -24,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
 
-        // Share user data with Inertia
+        // Share user data and navigation menus with Inertia
         Inertia::share([
             'auth' => function () {
                 $user = Auth::user();
@@ -36,6 +38,18 @@ class AppServiceProvider extends ServiceProvider
                         'roles' => $user->getRoleNames()->toArray(),
                         'permissions' => $user->getPermissionNames()->toArray(),
                     ] : null,
+                ];
+            },
+            
+            // Share navigation menus (permission-filtered)
+            'navigation' => function () {
+                $user = Auth::user();
+                $menuService = app(MenuService::class);
+                
+                return [
+                    'sidebar' => $menuService->getDesktopSidebar($user),
+                    'bottom' => $menuService->getMobileBottom($user),
+                    'drawer' => $menuService->getMobileDrawer($user),
                 ];
             },
         ]);
