@@ -18,41 +18,53 @@ class RolePermissionSeeder extends Seeder
 
         // Create CRUD permissions for each resource
         $permissions = [
-            // Master Data
-            'create master data',
-            'read master data',
-            'update master data',
-            'delete master data',
+            // Dashboard
+            'read dashboard',
             
-            // Users
-            'create users',
-            'read users',
-            'update users',
-            'delete users',
-            
-            // Permissions
-            'create permissions',
-            'read permissions',
-            'update permissions',
-            'delete permissions',
+            // Orders
+            'read orders',
             
             // Products
-            'create products',
             'read products',
+            'create products',
             'update products',
             'delete products',
             
-            // Attendance
-            'create attendance',
-            'read attendance',
-            'update attendance',
-            'delete attendance',
+            // Customers
+            'read customers',
+            'create customers',
+            'update customers',
+            'delete customers',
+            
+            // Users
+            'read users',
+            'create users',
+            'update users',
+            'delete users',
+            
+            // Permission
+            'read permission',
+            'create permission',
+            'update permission',
+            'delete permission',
+            
+            // Master Data
+            'read master data',
+            'create master data',
+            'update master data',
+            'delete master data',
             
             // Settings
-            'create settings',
             'read settings',
+            'create settings',
             'update settings',
             'delete settings',
+            
+            // Attendance
+            'read attendance',
+            'create attendance',
+            'update attendance',
+            'delete attendance',
         ];
 
         foreach ($permissions as $permission) {
@@ -68,12 +80,16 @@ class RolePermissionSeeder extends Seeder
 
         // Assign limited CRUD permissions to staff
         $staffPermissions = [
+            'read dashboard',
             'read products',
             'create products',
             'update products',
             'read attendance',
             'create attendance',
             'update attendance',
+            'read customers',
+            'create customers',
+            'update customers',
         ];
         $staffRole->syncPermissions($staffPermissions);
     }

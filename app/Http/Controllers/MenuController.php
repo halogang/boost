@@ -27,17 +27,17 @@ class MenuController extends Controller
             ->get()
             ->filter(function ($menu) use ($user) {
                 // If menu has permission, check if user has it
-                // if ($menu->permission && !$user->hasPermissionTo($menu->permission)) {
-                //     return false;
-                // }
+                if ($menu->permission && !$user->hasPermissionTo($menu->permission)) {
+                    return false;
+                }
                 
-                // // Filter children by permission
-                // $menu->children = $menu->children->filter(function ($child) use ($user) {
-                //     if ($child->permission && !$user->hasPermissionTo($child->permission)) {
-                //         return false;
-                //     }
-                //     return true;
-                // });
+                // Filter children by permission
+                $menu->children = $menu->children->filter(function ($child) use ($user) {
+                    if ($child->permission && !$user->hasPermissionTo($child->permission)) {
+                        return false;
+                    }
+                    return true;
+                });
                 
                 return true;
             })
