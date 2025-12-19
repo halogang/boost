@@ -32,7 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/permissions/toggle', [PermissionController::class, 'togglePermission']);
 });
 
-// ===== ADMIN ROUTES (User Management, Roles, System) =====
+// ===== MANAGEMENT ROUTES (User Management, Roles, System) =====
 Route::middleware(['auth'])->group(function () {
     // Users CRUD
     Route::resource('users', UserController::class);
