@@ -23,7 +23,7 @@ class MenuService
                 $query->where('active', true)
                       ->orderBy('order');
             }])
-            ->active()
+            // ->active()
             ->mainMenus()
             ->forPosition($device, $position);
 

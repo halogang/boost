@@ -10,32 +10,53 @@ use Inertia\Inertia;
 class MenuController extends Controller
 {
     /**
-     * Get menus for sidebar (with permission check)
+     * Get menus for sidebar (with role & permission check)
      */
     public function getMenus()
     {
         $user = Auth::user();
         
         if (!$user) {
+            // $menus = Menu::all();
             return response()->json([]);
         }
         
-        // Get main menus with their children
-        $menus = Menu::with('children')
+        // Get user's role IDs
+        $userRoleIds = $user->roles->pluck('id')->toArray();
+        
+        // Get main menus with their children and roles (include inactive)
+        $menus = Menu::with(['children.roles', 'roles'])
             ->mainMenus()
-            ->active()
+            ->orderBy('order')
             ->get()
-            ->filter(function ($menu) use ($user) {
+            ->filter(function ($menu) use ($user, $userRoleIds) {
+                // Check if menu has role restrictions
+                $menuRoleIds = $menu->roles->pluck('id')->toArray();
+                
+                // If menu has roles assigned, check if user has matching role
+                if (!empty($menuRoleIds) && empty(array_intersect($userRoleIds, $menuRoleIds))) {
+                    return false;
+                }
+                
                 // If menu has permission, check if user has it
                 if ($menu->permission && !$user->hasPermissionTo($menu->permission)) {
                     return false;
                 }
                 
-                // Filter children by permission
-                $menu->setRelation('children', $menu->children->filter(function ($child) use ($user) {
-                    if ($child->permission && !$user->hasPermissionTo($child->permission)) {
+                // Filter children by role & permission (include inactive for disabled state)
+                $menu->setRelation('children', $menu->children->filter(function ($child) use ($user, $userRoleIds) {
+                    // Check child role restrictions
+                    $childRoleIds = $child->roles->pluck('id')->toArray();
+                    
+                    if (!empty($childRoleIds) && empty(array_intersect($userRoleIds, $childRoleIds))) {
                         return false;
                     }
+                    
+                    // Check child permission (only if active)
+                    if ($child->active && $child->permission && !$user->hasPermissionTo($child->permission)) {
+                        return false;
+                    }
+                    
                     return true;
                 }));
                 

@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\Permission\Models\Role;
 
 class Menu extends Model
 {
@@ -50,6 +52,14 @@ class Menu extends Model
     }
 
     /**
+     * Get roles that can access this menu
+     */
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'menu_roles');
+    }
+
+    /**
      * Scope: Get only main menus (no parent)
      */
     public function scopeMainMenus($query)
@@ -61,10 +71,10 @@ class Menu extends Model
     /**
      * Scope: Get only active menus
      */
-    public function scopeActive($query)
-    {
-        return $query->where('active', true);
-    }
+    // public function scopeActive($query)
+    // {
+    //     return $query->where('active', true);
+    // }
 
     /**
      * Scope: Filter by device and position

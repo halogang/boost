@@ -24,6 +24,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
   const { url } = usePage();
   const [expandedMenus, setExpandedMenus] = useState<number[]>([]);
 
+  console.log({menus});
   const isActive = (route: string | null) => {
     if (!route) return false;
     return url.startsWith(`/${route}`);
@@ -118,12 +119,15 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
                 // Menu with children (submenu group)
                 <div>
                   <button
-                    onClick={() => toggleSubmenu(menu.id)}
+                    onClick={() => menu.active && toggleSubmenu(menu.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition justify-between ${
-                      menu.children.some((child) => isActive(child.route))
+                      !menu.active
+                        ? 'opacity-50 cursor-not-allowed text-gray-500'
+                        : menu.children.some((child) => isActive(child.route))
                         ? 'bg-blue-600 text-white'
                         : 'hover:bg-gray-800'
                     }`}
+                    disabled={!menu.active}
                   >
                     <div className="flex items-center gap-3">
                       <svg
@@ -140,22 +144,27 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
                         />
                       </svg>
                       <span className="font-medium">{menu.name}</span>
+                      {!menu.active && (
+                        <span className="text-[10px] bg-gray-700 px-2 py-0.5 rounded-full">Segera</span>
+                      )}
                     </div>
-                    <svg
-                      className={`w-4 h-4 transition-transform ${
-                        expandedMenus.includes(menu.id) ? 'rotate-180' : ''
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
+                    {menu.active && (
+                      <svg
+                        className={`w-4 h-4 transition-transform ${
+                          expandedMenus.includes(menu.id) ? 'rotate-180' : ''
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    )}
                   </button>
 
                   {/* Submenus */}
@@ -163,7 +172,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
                     <ul className="ml-4 mt-2 space-y-1 border-l border-gray-700 pl-2">
                       {menu.children.map((child) => (
                         <li key={child.id}>
-                          {child.route ? (
+                          {child.route && child.active ? (
                             <Link
                               href={route(child.route)}
                               onClick={handleLinkClick}
@@ -189,8 +198,26 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
                               {child.name}
                             </Link>
                           ) : (
-                            <span className="flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-gray-400">
+                            <span className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm ${
+                              !child.active ? 'text-gray-500 opacity-50 cursor-not-allowed' : 'text-gray-400'
+                            }`}>
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d={getIconSvg(child.icon)}
+                                />
+                              </svg>
                               {child.name}
+                              {!child.active && (
+                                <span className="text-[10px] bg-gray-700 px-2 py-0.5 rounded-full ml-auto">Segera</span>
+                              )}
                             </span>
                           )}
                         </li>
@@ -198,8 +225,8 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
                     </ul>
                   )}
                 </div>
-              ) : menu.route ? (
-                // Regular menu with route
+              ) : menu.route && menu.active ? (
+                // Regular menu with route (active)
                 <Link
                   href={route(menu.route)}
                   onClick={handleLinkClick}
@@ -224,6 +251,25 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
                   </svg>
                   <span className="font-medium">{menu.name}</span>
                 </Link>
+              ) : menu.route && !menu.active ? (
+                // Regular menu with route (inactive/disabled)
+                <div className="flex items-center gap-3 px-4 py-3 rounded-lg opacity-50 cursor-not-allowed text-gray-500">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d={getIconSvg(menu.icon)}
+                    />
+                  </svg>
+                  <span className="font-medium">{menu.name}</span>
+                  <span className="text-[10px] bg-gray-700 px-2 py-0.5 rounded-full ml-auto">Segera</span>
+                </div>
               ) : null}
             </div>
           ))}

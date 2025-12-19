@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { CheckCircle } from 'lucide-react';
+import RoleCard from '@/Components/Permissions/RoleCard';
 
 interface Permission {
   id: number;
@@ -10,7 +12,8 @@ interface Permission {
 interface Role {
   id: number;
   name: string;
-  permissions: Permission[];
+  permissions: number[];
+  permissions_count: number;
 }
 
 interface GroupedPermission {
@@ -19,20 +22,26 @@ interface GroupedPermission {
 
 interface Props {
   roles: Role[];
+  allPermissions: Permission[];
   groupedPermissions: GroupedPermission;
 }
 
-export default function PermissionMatrix({ roles, groupedPermissions }: Props) {
+export default function RolePermissionManagement({
+  roles,
+  allPermissions,
+  groupedPermissions,
+}: Props) {
   const { flash } = usePage().props as any;
+  const [expandedRole, setExpandedRole] = useState<number | null>(
+    roles[0]?.id || null
+  );
   const [loading, setLoading] = useState<string | null>(null);
-  const [checkedPermissions, setCheckedPermissions] = useState<{
-    [key: string]: boolean;
+  const [rolePermissions, setRolePermissions] = useState<{
+    [roleId: number]: number[];
   }>(() => {
-    const initial: { [key: string]: boolean } = {};
+    const initial: { [roleId: number]: number[] } = {};
     roles.forEach((role) => {
-      role.permissions.forEach((perm) => {
-        initial[`${role.id}-${perm.id}`] = true;
-      });
+      initial[role.id] = role.permissions;
     });
     return initial;
   });
@@ -46,9 +55,10 @@ export default function PermissionMatrix({ roles, groupedPermissions }: Props) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document
-            .querySelector('meta[name="csrf-token"]')
-            ?.getAttribute('content') || '',
+          'X-CSRF-TOKEN':
+            document
+              .querySelector('meta[name="csrf-token"]')
+              ?.getAttribute('content') || '',
         },
         body: JSON.stringify({
           role_id: roleId,
@@ -59,10 +69,17 @@ export default function PermissionMatrix({ roles, groupedPermissions }: Props) {
       const data = await response.json();
 
       if (data.success) {
-        setCheckedPermissions((prev) => ({
-          ...prev,
-          [key]: data.hasPermission,
-        }));
+        setRolePermissions((prev) => {
+          const current = prev[roleId] || [];
+          if (data.hasPermission) {
+            return { ...prev, [roleId]: [...current, permissionId] };
+          } else {
+            return {
+              ...prev,
+              [roleId]: current.filter((id) => id !== permissionId),
+            };
+          }
+        });
       }
     } catch (error) {
       console.error('Error toggling permission:', error);
@@ -72,96 +89,46 @@ export default function PermissionMatrix({ roles, groupedPermissions }: Props) {
   };
 
   return (
-    <AdminLayout title="Permission Management">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <p className="text-gray-600">Manajemen hak akses berdasarkan role</p>
-        </div>
+    <AdminLayout title="Role & Permission Management">
+      <div className="mb-8">
+        <p className="text-gray-600">
+          Kelola hak akses berdasarkan role. Pilih role untuk melihat dan
+          mengedit permissions.
+        </p>
       </div>
 
       {/* Success Message */}
       {flash?.success && (
-        <div className="mb-6 p-4 bg-green-100 border border-green-300 text-green-700 rounded-lg">
+        <div className="mb-6 p-4 bg-green-100 border border-green-300 text-green-700 rounded-lg flex items-center gap-2">
+          <CheckCircle className="w-5 h-5" />
           {flash.success}
         </div>
       )}
 
-      {/* Permission Matrix */}
-      <div className="bg-white rounded-lg shadow overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 w-64">
-                Permission
-              </th>
-              {roles.map((role) => (
-                <th
-                  key={role.id}
-                  className="px-6 py-3 text-center text-sm font-semibold text-gray-900"
-                >
-                  <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                    {role.name}
-                  </span>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {Object.entries(groupedPermissions).map(
-              ([resource, permissions]) => (
-                <React.Fragment key={resource}>
-                  {/* Resource Header */}
-                  <tr className="bg-gray-100">
-                    <td
-                      colSpan={roles.length + 1}
-                      className="px-6 py-2 text-sm font-semibold text-gray-700 uppercase"
-                    >
-                      {resource}
-                    </td>
-                  </tr>
-
-                  {/* Permission Rows */}
-                  {permissions.map((permission) => (
-                    <tr key={permission.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {permission.name}
-                      </td>
-                      {roles.map((role) => {
-                        const key = `${role.id}-${permission.id}`;
-                        const isChecked = checkedPermissions[key] || false;
-                        const isLoading = loading === key;
-
-                        return (
-                          <td
-                            key={key}
-                            className="px-6 py-4 text-center"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() =>
-                                handleToggle(role.id, permission.id)
-                              }
-                              disabled={isLoading}
-                              className="rounded w-4 h-4 cursor-pointer disabled:opacity-50"
-                            />
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </React.Fragment>
-              )
-            )}
-          </tbody>
-        </table>
+      {/* Role Cards */}
+      <div className="space-y-4">
+        {roles.map((role) => (
+          <RoleCard
+            key={role.id}
+            role={role}
+            isExpanded={expandedRole === role.id}
+            permissions={rolePermissions[role.id] || []}
+            allPermissionsCount={allPermissions.length}
+            groupedPermissions={groupedPermissions}
+            loading={loading}
+            onToggleExpand={() =>
+              setExpandedRole(expandedRole === role.id ? null : role.id)
+            }
+            onTogglePermission={handleToggle}
+          />
+        ))}
       </div>
 
-      {/* Legend */}
+      {/* Info Box */}
       <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
         <p className="text-sm text-blue-900">
-          <strong>Catatan:</strong> Centang untuk memberikan permission kepada role. Perubahan
-          akan disimpan otomatis.
+          <strong>💡 Tip:</strong> Permissions akan disimpan otomatis saat
+          {/* checkbox di-klik. Tidak perlu klik tombol Save. */}
         </p>
       </div>
     </AdminLayout>

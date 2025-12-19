@@ -2,7 +2,7 @@ import React, { ReactNode, useState } from 'react';
 import { usePage } from '@inertiajs/react';
 import Sidebar from './Sidebar';
 import MobileBottomNav from './MobileBottomNav';
-import MobileDrawer from '@/Components/MobileDrawer';
+import MobileDrawer from '@/Layouts/MobileDrawer';
 
 interface Props {
   children: ReactNode;
@@ -12,7 +12,6 @@ interface Props {
 export default function AdminLayout({ children, title }: Props) {
   const { auth, navigation } = usePage<any>().props;
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Desktop Sidebar */}

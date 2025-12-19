@@ -19,33 +19,61 @@ class RolePermissionSeeder extends Seeder
         // ===== CREATE PERMISSIONS =====
         $permissions = [
             // Dashboard
-            'dashboard.view',
+            'read dashboard',
 
-            // Orders
-            'order.view',
-            'order.update_status',
+            // Orders / Pesanan
+            'create orders',
+            'read orders',
+            'update orders',
+            'delete orders',
 
-            // Products
-            'product.view',
-            'product.create',
-            'product.update',
-            'product.delete',
+            // Products / Produk
+            'create products',
+            'read products',
+            'update products',
+            'delete products',
 
-            // Stock
-            'stock.view',
-            'stock.adjust',
+            // Stock / Stok
+            'create stock',
+            'read stock',
+            'update stock',
+            'delete stock',
 
-            // Reports
-            'report.view',
+            // Customers / Pelanggan
+            'create customers',
+            'read customers',
+            'update customers',
+            'delete customers',
 
-            // Notifications
-            'notification.view',
+            // Reports / Laporan
+            'create reports',
+            'read reports',
+            'update reports',
+            'delete reports',
 
-            // Settings - Admin only
-            'user.manage',
-            'role.manage',
-            'system.manage',
-            'audit.view',
+            // Notifications / Notifikasi
+            'read notifications',
+            'delete notifications',
+
+            // Users / Pengguna
+            'create users',
+            'read users',
+            'update users',
+            'delete users',
+
+            // Roles / Role & Permission
+            'create roles',
+            'read roles',
+            'update roles',
+            'delete roles',
+
+            // Settings / Pengaturan
+            'read settings',
+            'update settings',
+
+            // Audit / Audit Log
+
+            'read permissions'
         ];
 
         foreach ($permissions as $permission) {
@@ -64,37 +92,50 @@ class RolePermissionSeeder extends Seeder
         // Admin: Full access
         $adminRole->syncPermissions($permissions);
 
-        // Owner: View-only for most resources
+        // Owner: View-only
         $ownerRole->syncPermissions([
-            'dashboard.view',
-            'order.view',
-            'product.view',
-            'stock.view',
-            'report.view',
-            'notification.view',
+            'read dashboard',
+            'read orders',
+            'read products',
+            'read stock',
+            'read customers',
+            'read reports',
+            'read notifications',
+            'read settings',
         ]);
 
-        // Staff: Operations
+        // Staff: Operations (Orders, Products, Stock)
         $staffRole->syncPermissions([
-            'order.view',
-            'order.update_status',
-            'product.view',
-            'stock.view',
-            'notification.view',
+            'create orders',
+            'read orders',
+            'update orders',
+            'create products',
+            'read products',
+            'update products',
+            'delete products',
+            'create stock',
+            'read stock',
+            'update stock',
+            'read customers',
+            'update customers',
+            'read notifications',
+            'read settings',
         ]);
 
-        // Courier: Orders and notifications only
+        // Courier: Orders and notifications
         $courierRole->syncPermissions([
-            'order.view',
-            'order.update_status',
-            'notification.view',
+            'read orders',
+            'update orders',
+            'read notifications',
+            'read settings',
         ]);
 
         // Customer: Limited view
         $customerRole->syncPermissions([
-            'dashboard.view',
-            'order.view',
-            'notification.view',
+            'read dashboard',
+            'read orders',
+            'read notifications',
+            'read settings',
         ]);
     }
 }

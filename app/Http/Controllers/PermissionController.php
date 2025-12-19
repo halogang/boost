@@ -10,22 +10,36 @@ use Inertia\Inertia;
 class PermissionController extends Controller
 {
     /**
-     * Display permission matrix
+     * Display role-based permission management
      */
     public function index()
     {
-        $roles = Role::with('permissions')->get();
-        $permissions = Permission::orderBy('name')->get();
-
+        // Get all roles with their permissions
+        $roles = Role::with('permissions')->orderBy('name')->get();
+        
+        // Get all permissions grouped by resource
+        $allPermissions = Permission::orderBy('name')->get();
+        
         // Group permissions by resource
-        $groupedPermissions = $permissions->groupBy(function ($permission) {
+        $groupedPermissions = $allPermissions->groupBy(function ($permission) {
             // Extract resource name from permission name (e.g., "read users" -> "users")
             $parts = explode(' ', $permission->name);
             return end($parts); // Get last part (resource name)
         });
+        
+        // Transform roles with grouped permissions for easier access
+        $rolesData = $roles->map(function ($role) use ($groupedPermissions) {
+            return [
+                'id' => $role->id,
+                'name' => $role->name,
+                'permissions' => $role->permissions->pluck('id')->toArray(),
+                'permissions_count' => $role->permissions->count(),
+            ];
+        });
 
         return Inertia::render('Admin/Permissions/Index', [
-            'roles' => $roles,
+            'roles' => $rolesData,
+            'allPermissions' => $allPermissions,
             'groupedPermissions' => $groupedPermissions,
         ]);
     }

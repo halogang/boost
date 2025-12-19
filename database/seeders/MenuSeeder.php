@@ -4,7 +4,33 @@ namespace Database\Seeders;
 
 use App\Models\Menu;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 
+/**
+ * MenuSeeder - Seed default menus dengan role assignment
+ * 
+ * CARA KERJA:
+ * 1. Menu dibuat dengan create() - simpan ke variable untuk attach roles
+ * 2. Gunakan roles()->attach() untuk assign role ke menu
+ * 3. Jika menu punya parent_id, itu adalah submenu
+ * 4. Permission dicek di MenuController->getMenus()
+ * 
+ * FORMAT:
+ * - name: Nama menu yang tampil di sidebar
+ * - icon: Icon dari lucide-react (home, users, box, etc)
+ * - route: Route name Laravel (products.index, users.index, etc)
+ * - permission: Format 'resource.action' (product.view, user.manage)
+ * - parent_id: ID menu parent (null = main menu)
+ * - order: Urutan tampil (ascending)
+ * - active: Boolean untuk show/hide menu
+ * 
+ * ROLE ASSIGNMENT:
+ * - Admin only: ->roles()->attach([$adminRole->id])
+ * - Staff only: ->roles()->attach([$staffRole->id])
+ * - Both: ->roles()->attach([$adminRole->id, $staffRole->id])
+ * 
+ * Lihat MENU_MANAGEMENT.md untuk cara menambah menu manual tanpa seeder
+ */
 class MenuSeeder extends Seeder
 {
     /**
@@ -15,75 +41,95 @@ class MenuSeeder extends Seeder
         // Clear existing menus
         Menu::query()->delete();
 
+        // Get roles dari database
+        $adminRole = Role::where('name', 'admin')->first();
+        $staffRole = Role::where('name', 'staff')->first();
+
         // ===== MAIN MENUS =====
+        // Menu utama tanpa parent_id akan tampil sebagai top-level menu
+        
+        // Dashboard - Visible untuk Admin & Staff
         $dashboard = Menu::create([
             'name' => 'Dashboard',
             'icon' => 'home',
             'route' => 'dashboard',
-            'permission' => 'dashboard.view',
+            'permission' => 'read dashboard',
             'order' => 1,
             'active' => true,
         ]);
+        $dashboard->roles()->attach([$adminRole->id, $staffRole->id]);
 
+        // Pesanan - Visible untuk Admin & Staff
         $orders = Menu::create([
             'name' => 'Pesanan',
             'icon' => 'shopping-cart',
             'route' => 'orders.index',
-            'permission' => 'order.view',
+            'permission' => 'read orders',
             'order' => 2,
-            'active' => true,
+            'active' => false,
         ]);
+        $orders->roles()->attach([$adminRole->id, $staffRole->id]);
 
+        // Produk - Visible untuk Admin & Staff
         $products = Menu::create([
             'name' => 'Produk',
             'icon' => 'box',
             'route' => 'products.index',
-            'permission' => 'product.view',
+            'permission' => 'read products',
             'order' => 3,
-            'active' => true,
+            'active' => false,
         ]);
+        $products->roles()->attach([$adminRole->id, $staffRole->id]);
 
         $stock = Menu::create([
             'name' => 'Stok',
             'icon' => 'database',
             'route' => 'stock.index',
-            'permission' => 'stock.view',
+            'permission' => 'read stock',
             'order' => 4,
-            'active' => true,
+            'active' => false,
         ]);
+        $stock->roles()->attach([$adminRole->id]);
 
         $reports = Menu::create([
             'name' => 'Laporan',
             'icon' => 'file-text',
             'route' => 'reports.index',
-            'permission' => 'report.view',
+            'permission' => 'read reports',
             'order' => 5,
-            'active' => true,
+            'active' => false,
         ]);
+        $reports->roles()->attach([$adminRole->id]);
 
         $notifications = Menu::create([
             'name' => 'Notifikasi',
             'icon' => 'bell',
             'route' => 'notifications.index',
-            'permission' => 'notification.view',
+            'permission' => 'read notifications',
             'order' => 6,
             'active' => true,
         ]);
+        $notifications->roles()->attach([$adminRole->id, $staffRole->id]);
 
-        // ===== SETTINGS MENU (Always visible) =====
+        // ===== PARENT MENU: PENGATURAN =====
+        // Parent menu (route = null, permission = null)
+        // Akan punya children/submenus di bawahnya
         $settings = Menu::create([
             'name' => 'Pengaturan',
             'icon' => 'settings',
-            'route' => null, // Parent menu, no direct route
-            'permission' => null, // NULL = visible for all
+            'route' => null, // Tidak ada route karena parent
+            'permission' => null, // NULL = semua role bisa lihat parent
             'order' => 7,
             'active' => true,
         ]);
+        $settings->roles()->attach([$adminRole->id, $staffRole->id]);
 
-        // ===== SETTINGS SUBMENUS =====
+        // ===== SUBMENUS (parent_id = $settings->id) =====
         
-        // Public Settings (visible for all)
-        Menu::create([
+        // --- Public Submenus (Semua role bisa akses) ---
+        
+        // Profil - Public untuk semua user
+        $profile = Menu::create([
             'name' => 'Profil',
             'icon' => 'user',
             'route' => 'settings.profile',
@@ -92,8 +138,9 @@ class MenuSeeder extends Seeder
             'order' => 1,
             'active' => true,
         ]);
+        $profile->roles()->attach([$adminRole->id, $staffRole->id]);
 
-        Menu::create([
+        $security = Menu::create([
             'name' => 'Keamanan',
             'icon' => 'lock',
             'route' => 'settings.security',
@@ -102,67 +149,73 @@ class MenuSeeder extends Seeder
             'order' => 2,
             'active' => true,
         ]);
+        $security->roles()->attach([$adminRole->id, $staffRole->id]);
 
-        Menu::create([
+        $preferences = Menu::create([
             'name' => 'Preferensi',
             'icon' => 'sliders',
             'route' => 'settings.preferences',
             'permission' => null, // Public
             'parent_id' => $settings->id,
             'order' => 3,
-            'active' => true,
+            'active' => false ,
         ]);
+        $preferences->roles()->attach([$adminRole->id, $staffRole->id]);
 
-        // Admin Settings (permission-based)
-        Menu::create([
+        // --- Admin Only Submenus (Hanya Admin yang bisa akses) ---
+        
+        // Kelola User - ADMIN ONLY
+        $users = Menu::create([
             'name' => 'Kelola User',
             'icon' => 'users',
             'route' => 'users.index',
-            'permission' => 'user.manage',
+            'permission' => 'read users',
             'parent_id' => $settings->id,
             'order' => 4,
             'active' => true,
         ]);
+        $users->roles()->attach([$adminRole->id]);
 
-        Menu::create([
+        // Role & Permission - ADMIN ONLY
+        $roles = Menu::create([
             'name' => 'Role & Permission',
             'icon' => 'shield',
-            'route' => 'roles.index',
-            'permission' => 'role.manage',
+            'route' => 'permissions.index',
+            'permission' => 'read permissions',
             'parent_id' => $settings->id,
             'order' => 5,
             'active' => true,
         ]);
+        $roles->roles()->attach([$adminRole->id]);
 
-        Menu::create([
+        // Sistem - ADMIN ONLY
+        $system = Menu::create([
             'name' => 'Sistem',
             'icon' => 'server',
             'route' => 'system.index',
-            'permission' => 'system.manage',
+            'permission' => 'read settings',
             'parent_id' => $settings->id,
             'order' => 6,
-            'active' => true,
+            'active' => false,
         ]);
+        $system->roles()->attach([$adminRole->id]);
 
-        Menu::create([
-            'name' => 'Audit Log',
-            'icon' => 'eye',
-            'route' => 'audit.index',
-            'permission' => 'audit.view',
-            'parent_id' => $settings->id,
-            'order' => 7,
-            'active' => true,
-        ]);
+        
 
-        // Logout (always visible)
-        Menu::create([
+        // --- Public Submenu (Logout) ---
+        
+        // Keluar - Public untuk semua user
+        $logout = Menu::create([
             'name' => 'Keluar',
             'icon' => 'log-out',
             'route' => 'logout',
-            'permission' => null, // Public
+            'permission' => null,
             'parent_id' => $settings->id,
             'order' => 8,
             'active' => true,
         ]);
+        $logout->roles()->attach([$adminRole->id, $staffRole->id]);
+        
+        // DONE! Total: 9 main menus + submenus
     }
 }
