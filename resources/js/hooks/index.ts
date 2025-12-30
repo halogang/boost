@@ -12,4 +12,5 @@
 
 export { useToast } from './useToast';
 export { useFlashToast } from './useFlashToast';
+export { useCrudActions } from './useCrudActions';
 

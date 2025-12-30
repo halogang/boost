@@ -38,6 +38,7 @@ export interface DataTableProps<T> {
   onSearchChange?: (search: string) => void;
   onFilterChange?: (filters: Record<string, any>) => void;
   filters?: DataTableFilter[];
+  searchValue?: string; // Initial search value from server
   searchPlaceholder?: string;
   isLoading?: boolean;
   showSearch?: boolean;

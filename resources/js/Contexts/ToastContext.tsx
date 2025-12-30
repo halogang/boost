@@ -84,7 +84,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 export function useToast() {
   const context = useContext(ToastContext);
   if (!context) {
-    throw new Error('useToast must be used within ToastProvider');
+    // Return a no-op implementation instead of throwing
+    // This allows components to render during navigation transitions
+    return {
+      showToast: () => {},
+      success: () => {},
+      error: () => {},
+      warning: () => {},
+      info: () => {},
+      removeToast: () => {},
+    };
   }
   return context;
 }

@@ -42,12 +42,13 @@ class MenuSeeder extends Seeder
         Menu::query()->delete();
 
         // Get roles dari database
-        $superAdminRole = Role::where('name', 'super admin')->first();
-        $ownerRole = Role::where('name', 'owner')->first();
-        $branchAdminRole = Role::where('name', 'branch admin')->first();
-        $adminProduksiRole = Role::where('name', 'admin produksi')->first();
-        $staffProduksiRole = Role::where('name', 'staff produksi')->first();
-        $kurirRole = Role::where('name', 'kurir')->first();
+        $superAdminRole = Role::where('name', 'Super Admin')->first();
+        $ownerRole = Role::where('name', 'Owner')->first();
+        $managerRole = Role::where('name', 'Manager')->first();
+        $spvRole = Role::where('name', 'Spv')->first();
+        $adminRole = Role::where('name', 'Admin')->first();
+        $staffPengantaranRole = Role::where('name', 'Staff Pengantaran')->first();
+        $staffProduksiRole = Role::where('name', 'Staff Produksi')->first();
 
         // ===== MAIN MENUS =====
         // Menu utama tanpa parent_id akan tampil sebagai top-level menu
@@ -64,10 +65,10 @@ class MenuSeeder extends Seeder
         $dashboard->roles()->attach([
             $superAdminRole->id,
             $ownerRole->id,
-            $branchAdminRole->id,
-            $adminProduksiRole->id,
+            $managerRole->id,
+            $adminRole->id,
             $staffProduksiRole->id,
-            $kurirRole->id,
+            $staffPengantaranRole->id,
         ]);
 
         // Pembelian (Purchasing) - Supplier management and raw material procurement
@@ -82,8 +83,8 @@ class MenuSeeder extends Seeder
         $purchasing->roles()->attach([
             $superAdminRole->id,
             $ownerRole->id,
-            $branchAdminRole->id,
-            $adminProduksiRole->id,
+            $managerRole->id,
+            $adminRole->id,
         ]);
 
         // Inventori (Inventory) - Real-time stock control and warehouse records
@@ -98,8 +99,8 @@ class MenuSeeder extends Seeder
         $inventory->roles()->attach([
             $superAdminRole->id,
             $ownerRole->id,
-            $branchAdminRole->id,
-            $adminProduksiRole->id,
+            $managerRole->id,
+            $adminRole->id,
             $staffProduksiRole->id,
         ]);
 
@@ -115,8 +116,8 @@ class MenuSeeder extends Seeder
         $manufacturing->roles()->attach([
             $superAdminRole->id,
             $ownerRole->id,
-            $branchAdminRole->id,
-            $adminProduksiRole->id,
+            $managerRole->id,
+            $adminRole->id,
             $staffProduksiRole->id,
         ]);
 
@@ -132,8 +133,8 @@ class MenuSeeder extends Seeder
         $distribution->roles()->attach([
             $superAdminRole->id,
             $ownerRole->id,
-            $branchAdminRole->id,
-            $kurirRole->id,
+            $managerRole->id,
+            $staffPengantaranRole->id,
         ]);
 
         // Penjualan (Sales) - Order processing by admin or self-ordering by customers
@@ -148,7 +149,7 @@ class MenuSeeder extends Seeder
         $sales->roles()->attach([
             $superAdminRole->id,
             $ownerRole->id,
-            $branchAdminRole->id,
+            $managerRole->id,
         ]);
 
         // HR & Kehadiran (HR & Attendance) - Employee data, attendance, and shift records
@@ -163,8 +164,8 @@ class MenuSeeder extends Seeder
         $hr->roles()->attach([
             $superAdminRole->id,
             $ownerRole->id,
-            $branchAdminRole->id,
-            $adminProduksiRole->id,
+            $managerRole->id,
+            $adminRole->id,
         ]);
 
         // Keuangan (Finance) - Cash flow, income/expense, and profit reporting
@@ -179,8 +180,8 @@ class MenuSeeder extends Seeder
         $finance->roles()->attach([
             $superAdminRole->id,
             $ownerRole->id,
-            $branchAdminRole->id,
-            $adminProduksiRole->id,
+            $managerRole->id,
+            $adminRole->id,
         ]);
 
         // CRM - Customer engagement and follow-up management
@@ -195,7 +196,7 @@ class MenuSeeder extends Seeder
         $crm->roles()->attach([
             $superAdminRole->id,
             $ownerRole->id,
-            $branchAdminRole->id,
+            $managerRole->id,
         ]);
 
         // ===== PARENT MENU: PENGATURAN =====
@@ -212,10 +213,10 @@ class MenuSeeder extends Seeder
         $settings->roles()->attach([
             $superAdminRole->id,
             $ownerRole->id,
-            $branchAdminRole->id,
-            $adminProduksiRole->id,
+            $managerRole->id,
+            $adminRole->id,
             $staffProduksiRole->id,
-            $kurirRole->id,
+            $staffPengantaranRole->id,
         ]);
 
         // ===== SUBMENUS (parent_id = $settings->id) =====
@@ -235,10 +236,10 @@ class MenuSeeder extends Seeder
         $profile->roles()->attach([
             $superAdminRole->id,
             $ownerRole->id,
-            $branchAdminRole->id,
-            $adminProduksiRole->id,
+            $managerRole->id,
+            $adminRole->id,
             $staffProduksiRole->id,
-            $kurirRole->id,
+            $staffPengantaranRole->id,
         ]);
 
         $preferences = Menu::create([
@@ -253,10 +254,10 @@ class MenuSeeder extends Seeder
         $preferences->roles()->attach([
             $superAdminRole->id,
             $ownerRole->id,
-            $branchAdminRole->id,
-            $adminProduksiRole->id,
+            $managerRole->id,
+            $adminRole->id,
             $staffProduksiRole->id,
-            $kurirRole->id,
+            $staffPengantaranRole->id,
         ]);
 
         // Sistem Settings - SUPER ADMIN ONLY (di menu Pengaturan)
@@ -274,6 +275,18 @@ class MenuSeeder extends Seeder
 
         // ===== SUBMENUS OF SISTEM SETTINGS (parent_id = $systemSettings->id) =====
         
+        // System Settings - SUPER ADMIN ONLY (di Sistem Settings)
+        $systemSettingsItem = Menu::create([
+            'name' => 'System Settings',
+            'icon' => 'settings',
+            'route' => 'system.index',
+            'permission' => 'read settings',
+            'parent_id' => $systemSettings->id,
+            'order' => 1,
+            'active' => true,
+        ]);
+        $systemSettingsItem->roles()->attach([$superAdminRole->id]);
+        
         // Role & Permission - SUPER ADMIN ONLY (di Sistem Settings)
         $roles = Menu::create([
             'name' => 'Role & Permission',
@@ -281,7 +294,7 @@ class MenuSeeder extends Seeder
             'route' => 'permissions.index',
             'permission' => 'read permissions',
             'parent_id' => $systemSettings->id,
-            'order' => 1,
+            'order' => 2,
             'active' => true,
         ]);
         $roles->roles()->attach([$superAdminRole->id]);
@@ -293,7 +306,7 @@ class MenuSeeder extends Seeder
             'route' => 'menus.index',
             'permission' => 'read menus',
             'parent_id' => $systemSettings->id,
-            'order' => 2,
+            'order' => 3,
             'active' => true,
         ]);
         $menuManagement->roles()->attach([$superAdminRole->id]);
@@ -305,7 +318,7 @@ class MenuSeeder extends Seeder
             'route' => 'menu-role-positions.index',
             'permission' => 'read menu-role-positions',
             'parent_id' => $systemSettings->id,
-            'order' => 3,
+            'order' => 4,
             'active' => true,
         ]);
         $menuRolePositions->roles()->attach([$superAdminRole->id]);
@@ -350,6 +363,42 @@ class MenuSeeder extends Seeder
         ]);
         $users->roles()->attach([$superAdminRole->id]);
 
+        // ===== SUBMENU: PEMBELIAN (parent_id = $managementData->id) =====
+        // Pembelian - Parent menu untuk master data pembelian
+        $pembelianMaster = Menu::create([
+            'name' => 'Pembelian',
+            'icon' => 'shopping-cart',
+            'route' => null, // Tidak ada route karena parent
+            'permission' => null, // NULL = semua role bisa lihat parent (tapi children akan di-filter)
+            'parent_id' => $managementData->id,
+            'order' => 2,
+            'active' => true,
+        ]);
+        $pembelianMaster->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $managerRole->id,
+            $adminRole->id,
+        ]);
+
+        // ===== SUBMENUS OF PEMBELIAN (parent_id = $pembelianMaster->id) =====
+        // UOM (Unit of Measure) - Master Data
+        $uom = Menu::create([
+            'name' => 'UOM',
+            'icon' => 'ruler',
+            'route' => 'uoms.index',
+            'permission' => 'read uom',
+            'parent_id' => $pembelianMaster->id,
+            'order' => 1,
+            'active' => true,
+        ]);
+        $uom->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $managerRole->id,
+            $adminRole->id,
+        ]);
+
         // Role & Permission sudah dipindahkan ke Sistem Settings (di menu Pengaturan)
 
         
@@ -369,10 +418,10 @@ class MenuSeeder extends Seeder
         $logout->roles()->attach([
             $superAdminRole->id,
             $ownerRole->id,
-            $branchAdminRole->id,
-            $adminProduksiRole->id,
+            $managerRole->id,
+            $adminRole->id,
             $staffProduksiRole->id,
-            $kurirRole->id,
+            $staffPengantaranRole->id,
         ]);
         
         // DONE! Total: 10 main menus (Dashboard + 8 ERP modules + Settings) + submenus

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { usePage } from '@inertiajs/react';
 import { useToast } from '../Contexts/ToastContext';
 
@@ -32,19 +32,32 @@ import { useToast } from '../Contexts/ToastContext';
 export function useFlashToast() {
   const { flash } = usePage().props as any;
   const { success, error, warning, info } = useToast();
+  const processedFlashRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (flash?.success) {
+    // Skip if no flash messages
+    if (!flash) {
+      return;
+    }
+
+    // Create a unique key for this flash message to avoid duplicate toasts
+    const flashKey = JSON.stringify(flash);
+    if (processedFlashRef.current === flashKey) {
+      return; // Already processed this flash message
+    }
+
+    if (flash.success) {
       success(flash.success);
-    }
-    if (flash?.error) {
+      processedFlashRef.current = flashKey;
+    } else if (flash.error) {
       error(flash.error);
-    }
-    if (flash?.warning) {
+      processedFlashRef.current = flashKey;
+    } else if (flash.warning) {
       warning(flash.warning);
-    }
-    if (flash?.info) {
+      processedFlashRef.current = flashKey;
+    } else if (flash.info) {
       info(flash.info);
+      processedFlashRef.current = flashKey;
     }
   }, [flash, success, error, warning, info]);
 }

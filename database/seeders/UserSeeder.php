@@ -20,7 +20,7 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
-        $superAdmin->assignRole('super admin');
+        $superAdmin->assignRole('Super Admin');
 
         // Owner User (View-only access)
         $owner = User::create([
@@ -29,25 +29,43 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
-        $owner->assignRole('owner');
+        $owner->assignRole('Owner');
 
-        // Branch Admin User (Branch operations)
-        $branchAdmin = User::create([
-            'name' => 'Branch Admin',
-            'email' => 'branchadmin@ajibdarkah.com',
+        // Manager User (Branch operations)
+        $manager = User::create([
+            'name' => 'Manager',
+            'email' => 'manager@ajibdarkah.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
-        $branchAdmin->assignRole('branch admin');
+        $manager->assignRole('Manager');
 
-        // Admin Produksi User (Production management)
-        $adminProduksi = User::create([
-            'name' => 'Admin Produksi',
-            'email' => 'adminproduksi@ajibdarkah.com',
+        // Spv User (Supervisor)
+        $spv = User::create([
+            'name' => 'Spv',
+            'email' => 'spv@ajibdarkah.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
-        $adminProduksi->assignRole('admin produksi');
+        $spv->assignRole('Spv');
+
+        // Admin User (Production management)
+        $admin = User::create([
+            'name' => 'Admin',
+            'email' => 'admin@ajibdarkah.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+        ]);
+        $admin->assignRole('Admin');
+
+        // Staff Pengantaran User (Delivery operations)
+        $staffPengantaran = User::create([
+            'name' => 'Staff Pengantaran',
+            'email' => 'staffpengantaran@ajibdarkah.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+        ]);
+        $staffPengantaran->assignRole('Staff Pengantaran');
 
         // Staff Produksi User (Production operations)
         $staffProduksi = User::create([
@@ -56,15 +74,6 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
-        $staffProduksi->assignRole('staff produksi');
-
-        // Kurir User (Delivery operations)
-        $kurir = User::create([
-            'name' => 'Kurir',
-            'email' => 'kurir@ajibdarkah.com',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-        ]);
-        $kurir->assignRole('kurir');
+        $staffProduksi->assignRole('Staff Produksi');
     }
 }

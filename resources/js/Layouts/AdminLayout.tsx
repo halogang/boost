@@ -47,8 +47,8 @@ export default function AdminLayout({ children, title }: Props) {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Navigation */}
         <header className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 shadow-lg shadow-gray-900/5 sticky top-0 z-40">
-          <div className="flex items-center justify-between px-4 md:px-8 py-4">
-            {/* Left: Hamburger (Mobile) + Title */}
+          <div className="relative flex items-center justify-between px-4 md:px-8 py-4">
+            {/* Left: Hamburger (Mobile) + Title/Cabang (Desktop) */}
             <div className="flex items-center gap-4">
               {/* Hamburger Menu Button (Mobile Only) */}
               <button
@@ -70,14 +70,24 @@ export default function AdminLayout({ children, title }: Props) {
                 </svg>
               </button>
 
-              <div>
+              {/* Desktop: Show Cabang (hardcode) */}
+              <div className="hidden md:block">
                 <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
-                  {title || 'Admin Panel'}
+                  Cabang
                 </h1>
-                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
+                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
                   Kelola pengaturan sistem dan data master
                 </p>
               </div>
+            </div>
+
+            {/* Mobile: Logo di tengah (absolute positioning) */}
+            <div className="md:hidden absolute left-1/2 transform -translate-x-1/2">
+              <img
+                src="/AJIB-DARKAH-INDONESIA.png"
+                alt="Ajib Darkah Indonesia"
+                className="h-10 w-auto"
+              />
             </div>
 
             {/* Right: Theme Toggle + Notification + User Profile */}

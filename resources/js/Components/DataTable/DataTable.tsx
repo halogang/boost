@@ -20,6 +20,7 @@ export function DataTable<T>({
   onSearchChange,
   onFilterChange,
   filters = [],
+  searchValue: initialSearchValue = '',
   searchPlaceholder = 'Cari...',
   isLoading = false,
   showSearch = true,
@@ -28,10 +29,50 @@ export function DataTable<T>({
   perPageOptions = [10, 25, 50, 100],
   emptyMessage = 'Tidak ada data yang ditemukan',
 }: DataTableProps<T>) {
-  const [searchValue, setSearchValue] = useState('');
-  const [filterValues, setFilterValues] = useState<Record<string, any>>(
-    filters.reduce((acc, filter) => ({ ...acc, [filter.key]: filter.value || '' }), {})
-  );
+  const [searchValue, setSearchValue] = useState(initialSearchValue);
+  const searchTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const lastSentSearchRef = React.useRef<string>(initialSearchValue);
+  const isSyncingFromServerRef = React.useRef<boolean>(false);
+  
+  // Initialize filter values from filters prop
+  const initialFilterValues = filters.reduce((acc, filter) => {
+    acc[filter.key] = filter.value || '';
+    return acc;
+  }, {} as Record<string, any>);
+  const [filterValues, setFilterValues] = useState<Record<string, any>>(initialFilterValues);
+
+  // Sync state with props when they change (only if different from what we sent)
+  useEffect(() => {
+    // Only sync if server response matches what we sent (confirmation from server)
+    if (initialSearchValue === lastSentSearchRef.current) {
+      // Server response matches what we sent - update state if needed
+      if (initialSearchValue !== searchValue) {
+        isSyncingFromServerRef.current = true;
+        setSearchValue(initialSearchValue);
+        // Reset flag after state update
+        setTimeout(() => {
+          isSyncingFromServerRef.current = false;
+        }, 0);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSearchValue]);
+
+  useEffect(() => {
+    const newFilterValues = filters.reduce((acc, filter) => {
+      acc[filter.key] = filter.value || '';
+      return acc;
+    }, {} as Record<string, any>);
+    
+    // Only update if values actually changed
+    const hasChanged = Object.keys(newFilterValues).some(
+      key => newFilterValues[key] !== filterValues[key]
+    );
+    if (hasChanged) {
+      setFilterValues(newFilterValues);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
 
   const table = useReactTable({
     data,
@@ -41,11 +82,42 @@ export function DataTable<T>({
     pageCount: pagination?.last_page ?? -1,
   });
 
+  // Debounce search to avoid too many requests
+  useEffect(() => {
+    // Skip if syncing from server (don't trigger search on server response)
+    if (isSyncingFromServerRef.current) {
+      return;
+    }
+
+    // Skip if value is same as last sent value (no need to search again)
+    if (searchValue === lastSentSearchRef.current) {
+      return;
+    }
+
+    // Clear existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Debounce search - wait 500ms after user stops typing
+    searchTimeoutRef.current = setTimeout(() => {
+      if (onSearchChange && searchValue !== lastSentSearchRef.current) {
+        lastSentSearchRef.current = searchValue;
+        onSearchChange(searchValue);
+      }
+    }, 500);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchValue]);
+
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
-    if (onSearchChange) {
-      onSearchChange(value);
-    }
+    // Don't call onSearchChange immediately - let debounce handle it
   };
 
   const handlePerPageChange = (perPage: number) => {

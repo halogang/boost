@@ -30,6 +30,12 @@ class RolePermissionSeeder extends Seeder
             'read suppliers',
             'update suppliers',
             'delete suppliers',
+            
+            // UOM (Unit of Measure) / Satuan Ukur
+            'create uom',
+            'read uom',
+            'update uom',
+            'delete uom',
 
             // Inventory / Inventori
             'create inventory',
@@ -146,12 +152,13 @@ class RolePermissionSeeder extends Seeder
         }
 
         // ===== CREATE ROLES =====
-        $superAdminRole = Role::firstOrCreate(['name' => 'super admin']);
-        $ownerRole = Role::firstOrCreate(['name' => 'owner']);
-        $branchAdminRole = Role::firstOrCreate(['name' => 'branch admin']);
-        $adminProduksiRole = Role::firstOrCreate(['name' => 'admin produksi']);
-        $staffProduksiRole = Role::firstOrCreate(['name' => 'staff produksi']);
-        $kurirRole = Role::firstOrCreate(['name' => 'kurir']);
+        $superAdminRole = Role::firstOrCreate(['name' => 'Super Admin']);
+        $ownerRole = Role::firstOrCreate(['name' => 'Owner']);
+        $managerRole = Role::firstOrCreate(['name' => 'Manager']);
+        $spvRole = Role::firstOrCreate(['name' => 'Spv']);
+        $adminRole = Role::firstOrCreate(['name' => 'Admin']);
+        $staffPengantaranRole = Role::firstOrCreate(['name' => 'Staff Pengantaran']);
+        $staffProduksiRole = Role::firstOrCreate(['name' => 'Staff Produksi']);
 
         // ===== ASSIGN PERMISSIONS TO ROLES =====
 
@@ -186,10 +193,11 @@ class RolePermissionSeeder extends Seeder
             'update settings',
             'read preferences',
             'update preferences',
+            'read uom',
         ]);
 
-        // Branch Admin: Full access to branch operations (except system settings)
-        $branchAdminRole->syncPermissions([
+        // Manager: Full access to branch operations (except system settings)
+        $managerRole->syncPermissions([
             'read dashboard',
             'create purchasing',
             'read purchasing',
@@ -241,10 +249,46 @@ class RolePermissionSeeder extends Seeder
             'update settings',
             'read preferences',
             'update preferences',
+            'create uom',
+            'read uom',
+            'update uom',
         ]);
 
-        // Admin Produksi: Full access to production and inventory
-        $adminProduksiRole->syncPermissions([
+        // Spv: Supervisor access with oversight capabilities
+        $spvRole->syncPermissions([
+            'read dashboard',
+            'read purchasing',
+            'read suppliers',
+            'read inventory',
+            'read stock',
+            'update stock',
+            'read manufacturing',
+            'update manufacturing',
+            'read distribution',
+            'read routes',
+            'read orders',
+            'update orders',
+            'read sales',
+            'read employees',
+            'read attendance',
+            'update attendance',
+            'read shifts',
+            'read finance',
+            'read cashflow',
+            'read income',
+            'read expenses',
+            'read profit',
+            'read customers',
+            'read crm',
+            'read reports',
+            'read notifications',
+            'read settings',
+            'read preferences',
+            'read uom',
+        ]);
+
+        // Admin: Full access to production and inventory
+        $adminRole->syncPermissions([
             'read dashboard',
             'read purchasing',
             'read suppliers',
@@ -266,6 +310,22 @@ class RolePermissionSeeder extends Seeder
             'read notifications',
             'read settings',
             'read preferences',
+            'create uom',
+            'read uom',
+            'update uom',
+        ]);
+
+        // Staff Pengantaran: Access to distribution and orders
+        $staffPengantaranRole->syncPermissions([
+            'read dashboard',
+            'read distribution',
+            'read routes',
+            'update routes',
+            'read orders',
+            'update orders',
+            'read customers',
+            'read notifications',
+            'read settings',
         ]);
 
         // Staff Produksi: Limited access to production operations
@@ -282,19 +342,6 @@ class RolePermissionSeeder extends Seeder
             'read notifications',
             'read settings',
             'read preferences',
-        ]);
-
-        // Kurir: Access to distribution and orders
-        $kurirRole->syncPermissions([
-            'read dashboard',
-            'read distribution',
-            'read routes',
-            'update routes',
-            'read orders',
-            'update orders',
-            'read customers',
-            'read notifications',
-            'read settings',
         ]);
     }
 }

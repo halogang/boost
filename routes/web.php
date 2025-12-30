@@ -7,6 +7,7 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\UomController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -152,6 +153,9 @@ Route::middleware(['auth'])->group(function () {
             return Inertia::render('Settings/Preferences');
         })->name('preferences');
     });
+
+    // Master Data - UOM (Unit of Measure)
+    Route::resource('uoms', UomController::class);
 });
 
 require __DIR__.'/auth.php';

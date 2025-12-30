@@ -196,7 +196,116 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
                     <ul className="ml-4 mt-2 space-y-1 border-l border-gray-700 pl-2">
                       {menu.children.map((child) => (
                         <li key={child.id}>
-                          {child.route && child.active ? (
+                          {/* Check if child has children (nested submenu) */}
+                          {child.children && child.children.length > 0 ? (
+                            <div>
+                              <button
+                                onClick={() => child.active && toggleSubmenu(child.id)}
+                                className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition justify-between ${
+                                  !child.active
+                                    ? 'opacity-50 cursor-not-allowed text-gray-500'
+                                    : child.children.some((grandChild) => isActive(grandChild.route))
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'hover:bg-gray-800'
+                                }`}
+                                disabled={!child.active}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d={getIconSvg(child.icon)}
+                                    />
+                                  </svg>
+                                  <span>{child.name}</span>
+                                  {!child.active && (
+                                    <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium ml-auto">Segera</span>
+                                  )}
+                                </div>
+                                {child.active && (
+                                  <svg
+                                    className={`w-3 h-3 transition-transform ${
+                                      expandedMenus.includes(child.id) ? 'rotate-180' : ''
+                                    }`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M19 9l-7 7-7-7"
+                                    />
+                                  </svg>
+                                )}
+                              </button>
+                              {/* Nested children (level 3) */}
+                              {expandedMenus.includes(child.id) && child.children && (
+                                <ul className="ml-4 mt-1 space-y-1 border-l border-gray-700 pl-2">
+                                  {child.children.map((grandChild) => (
+                                    <li key={grandChild.id}>
+                                      {grandChild.route && grandChild.active ? (
+                                        <Link
+                                          href={route(grandChild.route)}
+                                          onClick={handleLinkClick}
+                                          className={`flex items-center gap-3 px-4 py-2 rounded-lg text-xs transition ${
+                                            isActive(grandChild.route)
+                                              ? 'bg-primary text-primary-foreground font-semibold'
+                                              : 'hover:bg-gray-800'
+                                          }`}
+                                        >
+                                          <svg
+                                            className="w-3 h-3"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={2}
+                                              d={getIconSvg(grandChild.icon)}
+                                            />
+                                          </svg>
+                                          {grandChild.name}
+                                        </Link>
+                                      ) : (
+                                        <span className={`flex items-center gap-3 px-4 py-2 rounded-lg text-xs ${
+                                          !grandChild.active ? 'text-gray-500 opacity-50 cursor-not-allowed' : 'text-gray-400'
+                                        }`}>
+                                          <svg
+                                            className="w-3 h-3"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={2}
+                                              d={getIconSvg(grandChild.icon)}
+                                            />
+                                          </svg>
+                                          {grandChild.name}
+                                          {!grandChild.active && (
+                                            <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium ml-auto">Segera</span>
+                                          )}
+                                        </span>
+                                      )}
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
+                          ) : child.route && child.active ? (
                             <Link
                               href={route(child.route)}
                               onClick={handleLinkClick}

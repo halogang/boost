@@ -30,5 +30,8 @@ class DatabaseSeeder extends Seeder
 
         // 5. Seed default settings
         $this->call(SettingsSeeder::class);
+
+        // 6. Seed UOM (Unit of Measure)
+        $this->call(UomSeeder::class);
     }
 }

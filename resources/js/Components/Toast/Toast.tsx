@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { cn } from '../../lib/utils';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -18,76 +18,126 @@ interface ToastProps {
 
 const toastIcons: Record<ToastType, React.ReactNode> = {
   success: (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
   ),
   error: (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
   ),
   warning: (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
     </svg>
   ),
   info: (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
     </svg>
   ),
 };
 
 const toastStyles: Record<ToastType, string> = {
-  success: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
-  error: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
-  warning: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200',
-  info: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200',
+  success: 'bg-white dark:bg-gray-800 border-l-4 border-green-500 shadow-xl backdrop-blur-sm',
+  error: 'bg-white dark:bg-gray-800 border-l-4 border-red-500 shadow-xl backdrop-blur-sm',
+  warning: 'bg-white dark:bg-gray-800 border-l-4 border-yellow-500 shadow-xl backdrop-blur-sm',
+  info: 'bg-white dark:bg-gray-800 border-l-4 border-blue-500 shadow-xl backdrop-blur-sm',
 };
 
-const iconStyles: Record<ToastType, string> = {
-  success: 'text-green-600 dark:text-green-400',
-  error: 'text-red-600 dark:text-red-400',
-  warning: 'text-yellow-600 dark:text-yellow-400',
-  info: 'text-blue-600 dark:text-blue-400',
+const iconContainerStyles: Record<ToastType, string> = {
+  success: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+  error: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
+  warning: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
+  info: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+};
+
+const textStyles: Record<ToastType, string> = {
+  success: 'text-gray-900 dark:text-gray-100',
+  error: 'text-gray-900 dark:text-gray-100',
+  warning: 'text-gray-900 dark:text-gray-100',
+  info: 'text-gray-900 dark:text-gray-100',
 };
 
 export default function ToastComponent({ toast, onClose }: ToastProps) {
+  const [progress, setProgress] = useState(100);
+  const duration = toast.duration ?? 5000;
+
   useEffect(() => {
-    const duration = toast.duration ?? 5000;
     if (duration > 0) {
+      const interval = 50; // Update every 50ms for smooth animation
+      const decrement = (100 / duration) * interval;
+      
+      const progressInterval = setInterval(() => {
+        setProgress((prev) => {
+          const newProgress = prev - decrement;
+          return newProgress <= 0 ? 0 : newProgress;
+        });
+      }, interval);
+
       const timer = setTimeout(() => {
         onClose(toast.id);
       }, duration);
-      return () => clearTimeout(timer);
+
+      return () => {
+        clearTimeout(timer);
+        clearInterval(progressInterval);
+      };
     }
-  }, [toast.id, toast.duration, onClose]);
+  }, [toast.id, duration, onClose]);
 
   return (
     <div
       className={cn(
-        'flex items-start gap-3 p-4 rounded-lg border shadow-lg min-w-[320px] max-w-[420px] transition-all duration-300 transform translate-x-0',
+        'relative flex items-start gap-4 p-5 rounded-xl border shadow-2xl min-w-[320px] max-w-md',
+        'transform transition-all duration-300 ease-out',
+        'hover:shadow-2xl hover:scale-[1.02]',
         toastStyles[toast.type]
       )}
       role="alert"
     >
-      <div className={cn('flex-shrink-0', iconStyles[toast.type])}>
+      {/* Progress Bar */}
+      {duration > 0 && (
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 rounded-t-xl overflow-hidden">
+          <div
+            className={cn(
+              'h-full transition-all duration-75 ease-linear',
+              toast.type === 'success' && 'bg-green-500',
+              toast.type === 'error' && 'bg-red-500',
+              toast.type === 'warning' && 'bg-yellow-500',
+              toast.type === 'info' && 'bg-blue-500'
+            )}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+
+      {/* Icon Container */}
+      <div className={cn('flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center', iconContainerStyles[toast.type])}>
         {toastIcons[toast.type]}
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm">{toast.title}</p>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0 pt-0.5">
+        <p className={cn('font-semibold text-base leading-tight', textStyles[toast.type])}>
+          {toast.title}
+        </p>
         {toast.message && (
-          <p className="text-sm mt-1 opacity-90">{toast.message}</p>
+          <p className={cn('text-sm mt-1.5 leading-relaxed opacity-80', textStyles[toast.type])}>
+            {toast.message}
+          </p>
         )}
       </div>
+
+      {/* Close Button */}
       <button
         onClick={() => onClose(toast.id)}
-        className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+        className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
         aria-label="Close"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
     </div>
