@@ -11,14 +11,17 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+// Landing Page (Public)
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
+    return Inertia::render('Landing/Index');
+})->name('landing');
+
+// Order Page (Public) - Mock only, no backend
+Route::get('/order', function () {
+    return Inertia::render('Order/Index', [
+        'orderType' => request()->query('type', 'regular') === 'partnership' ? 'partnership' : 'regular',
     ]);
-});
+})->name('order.index');
 
 
 Route::middleware('auth')->group(function () {
