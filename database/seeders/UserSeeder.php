@@ -13,58 +13,58 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Admin User (Full Access)
-        $admin = User::create([
-            'name' => 'Admin AquaGalon',
-            'email' => 'admin@aquagalon.com',
+        // Super Admin User (Full Access)
+        $superAdmin = User::create([
+            'name' => 'Super Admin',
+            'email' => 'superadmin@ajibdarkah.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
-        $admin->assignRole('admin');
+        $superAdmin->assignRole('super admin');
 
         // Owner User (View-only access)
         $owner = User::create([
             'name' => 'Owner',
-            'email' => 'owner@aquagalon.com',
+            'email' => 'owner@ajibdarkah.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
         $owner->assignRole('owner');
 
-        // Staff User (Operations)
-        $staff = User::create([
-            'name' => 'Staff Member',
-            'email' => 'staff@aquagalon.com',
+        // Branch Admin User (Branch operations)
+        $branchAdmin = User::create([
+            'name' => 'Branch Admin',
+            'email' => 'branchadmin@ajibdarkah.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
-        $staff->assignRole('staff');
+        $branchAdmin->assignRole('branch admin');
 
-        // Courier User (Delivery operations)
-        $courier = User::create([
+        // Admin Produksi User (Production management)
+        $adminProduksi = User::create([
+            'name' => 'Admin Produksi',
+            'email' => 'adminproduksi@ajibdarkah.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+        ]);
+        $adminProduksi->assignRole('admin produksi');
+
+        // Staff Produksi User (Production operations)
+        $staffProduksi = User::create([
+            'name' => 'Staff Produksi',
+            'email' => 'staffproduksi@ajibdarkah.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+        ]);
+        $staffProduksi->assignRole('staff produksi');
+
+        // Kurir User (Delivery operations)
+        $kurir = User::create([
             'name' => 'Kurir',
-            'email' => 'courier@aquagalon.com',
+            'email' => 'kurir@ajibdarkah.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
-        $courier->assignRole('courier');
-
-        // Customer User (Limited access)
-        $customer = User::create([
-            'name' => 'Customer',
-            'email' => 'customer@aquagalon.com',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-        ]);
-        $customer->assignRole('customer');
-
-        // Additional test users
-        $testAdmin = User::create([
-            'name' => 'Test Admin',
-            'email' => 'test@admin.com',
-            'password' => Hash::make('admin123'),
-            'email_verified_at' => now(),
-        ]);
-        $testAdmin->assignRole('admin');
+        $kurir->assignRole('kurir');
     }
 }

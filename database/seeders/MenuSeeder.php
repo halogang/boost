@@ -42,13 +42,17 @@ class MenuSeeder extends Seeder
         Menu::query()->delete();
 
         // Get roles dari database
-        $adminRole = Role::where('name', 'admin')->first();
-        $staffRole = Role::where('name', 'staff')->first();
+        $superAdminRole = Role::where('name', 'super admin')->first();
+        $ownerRole = Role::where('name', 'owner')->first();
+        $branchAdminRole = Role::where('name', 'branch admin')->first();
+        $adminProduksiRole = Role::where('name', 'admin produksi')->first();
+        $staffProduksiRole = Role::where('name', 'staff produksi')->first();
+        $kurirRole = Role::where('name', 'kurir')->first();
 
         // ===== MAIN MENUS =====
         // Menu utama tanpa parent_id akan tampil sebagai top-level menu
         
-        // Dashboard - Visible untuk Admin & Staff
+        // Dashboard - Visible untuk semua roles
         $dashboard = Menu::create([
             'name' => 'Dashboard',
             'icon' => 'home',
@@ -57,59 +61,142 @@ class MenuSeeder extends Seeder
             'order' => 1,
             'active' => true,
         ]);
-        $dashboard->roles()->attach([$adminRole->id, $staffRole->id]);
+        $dashboard->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $branchAdminRole->id,
+            $adminProduksiRole->id,
+            $staffProduksiRole->id,
+            $kurirRole->id,
+        ]);
 
-        // Pesanan - Visible untuk Admin & Staff
-        $orders = Menu::create([
-            'name' => 'Pesanan',
+        // Pembelian (Purchasing) - Supplier management and raw material procurement
+        $purchasing = Menu::create([
+            'name' => 'Pembelian',
             'icon' => 'shopping-cart',
-            'route' => 'orders.index',
-            'permission' => 'read orders',
+            'route' => 'purchasing.index',
+            'permission' => 'read purchasing',
             'order' => 2,
-            'active' => false,
+            'active' => false, // Nonaktifkan sementara - akan dibuat untuk client
         ]);
-        $orders->roles()->attach([$adminRole->id, $staffRole->id]);
-
-        // Produk - Visible untuk Admin & Staff
-        $products = Menu::create([
-            'name' => 'Produk',
-            'icon' => 'box',
-            'route' => 'products.index',
-            'permission' => 'read products',
-            'order' => 3,
-            'active' => false,
+        $purchasing->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $branchAdminRole->id,
+            $adminProduksiRole->id,
         ]);
-        $products->roles()->attach([$adminRole->id, $staffRole->id]);
 
-        $stock = Menu::create([
-            'name' => 'Stok',
+        // Inventori (Inventory) - Real-time stock control and warehouse records
+        $inventory = Menu::create([
+            'name' => 'Inventori',
             'icon' => 'database',
-            'route' => 'stock.index',
-            'permission' => 'read stock',
+            'route' => 'inventory.index',
+            'permission' => 'read inventory',
+            'order' => 3,
+            'active' => false, // Nonaktifkan sementara - akan dibuat untuk client
+        ]);
+        $inventory->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $branchAdminRole->id,
+            $adminProduksiRole->id,
+            $staffProduksiRole->id,
+        ]);
+
+        // Produksi (Manufacturing) - Water production tracking and processing
+        $manufacturing = Menu::create([
+            'name' => 'Produksi',
+            'icon' => 'box',
+            'route' => 'manufacturing.index',
+            'permission' => 'read manufacturing',
             'order' => 4,
-            'active' => false,
+            'active' => false, // Nonaktifkan sementara - akan dibuat untuk client
         ]);
-        $stock->roles()->attach([$adminRole->id]);
+        $manufacturing->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $branchAdminRole->id,
+            $adminProduksiRole->id,
+            $staffProduksiRole->id,
+        ]);
 
-        $reports = Menu::create([
-            'name' => 'Laporan',
-            'icon' => 'file-text',
-            'route' => 'reports.index',
-            'permission' => 'read reports',
+        // Distribusi (Distribution) - Route scheduling and courier/driver management
+        $distribution = Menu::create([
+            'name' => 'Distribusi',
+            'icon' => 'truck',
+            'route' => 'distribution.index',
+            'permission' => 'read distribution',
             'order' => 5,
-            'active' => false,
+            'active' => false, // Nonaktifkan sementara - akan dibuat untuk client
         ]);
-        $reports->roles()->attach([$adminRole->id]);
+        $distribution->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $branchAdminRole->id,
+            $kurirRole->id,
+        ]);
 
-        $notifications = Menu::create([
-            'name' => 'Notifikasi',
-            'icon' => 'bell',
-            'route' => 'notifications.index',
-            'permission' => 'read notifications',
+        // Penjualan (Sales) - Order processing by admin or self-ordering by customers
+        $sales = Menu::create([
+            'name' => 'Penjualan',
+            'icon' => 'shopping-bag',
+            'route' => 'sales.index',
+            'permission' => 'read sales',
             'order' => 6,
-            'active' => true,
+            'active' => false, // Nonaktifkan sementara - akan dibuat untuk client
         ]);
-        $notifications->roles()->attach([$adminRole->id, $staffRole->id]);
+        $sales->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $branchAdminRole->id,
+        ]);
+
+        // HR & Kehadiran (HR & Attendance) - Employee data, attendance, and shift records
+        $hr = Menu::create([
+            'name' => 'HR & Kehadiran',
+            'icon' => 'users',
+            'route' => 'hr.index',
+            'permission' => 'read employees',
+            'order' => 7,
+            'active' => false, // Nonaktifkan sementara - akan dibuat untuk client
+        ]);
+        $hr->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $branchAdminRole->id,
+            $adminProduksiRole->id,
+        ]);
+
+        // Keuangan (Finance) - Cash flow, income/expense, and profit reporting
+        $finance = Menu::create([
+            'name' => 'Keuangan',
+            'icon' => 'dollar-sign',
+            'route' => 'finance.index',
+            'permission' => 'read finance',
+            'order' => 8,
+            'active' => false, // Nonaktifkan sementara - akan dibuat untuk client
+        ]);
+        $finance->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $branchAdminRole->id,
+            $adminProduksiRole->id,
+        ]);
+
+        // CRM - Customer engagement and follow-up management
+        $crm = Menu::create([
+            'name' => 'CRM',
+            'icon' => 'user-circle',
+            'route' => 'crm.index',
+            'permission' => 'read crm',
+            'order' => 9,
+            'active' => false, // Nonaktifkan sementara - akan dibuat untuk client
+        ]);
+        $crm->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $branchAdminRole->id,
+        ]);
 
         // ===== PARENT MENU: PENGATURAN =====
         // Parent menu (route = null, permission = null)
@@ -119,16 +206,23 @@ class MenuSeeder extends Seeder
             'icon' => 'settings',
             'route' => null, // Tidak ada route karena parent
             'permission' => null, // NULL = semua role bisa lihat parent
-            'order' => 7,
+            'order' => 10,
             'active' => true,
         ]);
-        $settings->roles()->attach([$adminRole->id, $staffRole->id]);
+        $settings->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $branchAdminRole->id,
+            $adminProduksiRole->id,
+            $staffProduksiRole->id,
+            $kurirRole->id,
+        ]);
 
         // ===== SUBMENUS (parent_id = $settings->id) =====
         
         // --- Public Submenus (Semua role bisa akses) ---
         
-        // Profil - Public untuk semua user
+        // Profil - Public untuk semua user (menggabungkan profil dan keamanan)
         $profile = Menu::create([
             'name' => 'Profil',
             'icon' => 'user',
@@ -138,67 +232,125 @@ class MenuSeeder extends Seeder
             'order' => 1,
             'active' => true,
         ]);
-        $profile->roles()->attach([$adminRole->id, $staffRole->id]);
-
-        $security = Menu::create([
-            'name' => 'Keamanan',
-            'icon' => 'lock',
-            'route' => 'settings.security',
-            'permission' => null, // Public
-            'parent_id' => $settings->id,
-            'order' => 2,
-            'active' => true,
+        $profile->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $branchAdminRole->id,
+            $adminProduksiRole->id,
+            $staffProduksiRole->id,
+            $kurirRole->id,
         ]);
-        $security->roles()->attach([$adminRole->id, $staffRole->id]);
 
         $preferences = Menu::create([
             'name' => 'Preferensi',
             'icon' => 'sliders',
             'route' => 'settings.preferences',
-            'permission' => null, // Public
+            'permission' => 'read preferences',
             'parent_id' => $settings->id,
             'order' => 3,
             'active' => false ,
         ]);
-        $preferences->roles()->attach([$adminRole->id, $staffRole->id]);
+        $preferences->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $branchAdminRole->id,
+            $adminProduksiRole->id,
+            $staffProduksiRole->id,
+            $kurirRole->id,
+        ]);
 
-        // --- Admin Only Submenus (Hanya Admin yang bisa akses) ---
-        
-        // Kelola User - ADMIN ONLY
-        $users = Menu::create([
-            'name' => 'Kelola User',
-            'icon' => 'users',
-            'route' => 'users.index',
-            'permission' => 'read users',
+        // Sistem Settings - SUPER ADMIN ONLY (di menu Pengaturan)
+        // Parent menu untuk Role & Permission, Kelola Menu, dan Menu per Role
+        $systemSettings = Menu::create([
+            'name' => 'Sistem Settings',
+            'icon' => 'server',
+            'route' => null, // Tidak ada route karena parent
+            'permission' => null, // NULL = semua role bisa lihat parent (tapi children akan di-filter)
             'parent_id' => $settings->id,
             'order' => 4,
             'active' => true,
         ]);
-        $users->roles()->attach([$adminRole->id]);
+        $systemSettings->roles()->attach([$superAdminRole->id]);
 
-        // Role & Permission - ADMIN ONLY
+        // ===== SUBMENUS OF SISTEM SETTINGS (parent_id = $systemSettings->id) =====
+        
+        // Role & Permission - SUPER ADMIN ONLY (di Sistem Settings)
         $roles = Menu::create([
             'name' => 'Role & Permission',
             'icon' => 'shield',
             'route' => 'permissions.index',
             'permission' => 'read permissions',
-            'parent_id' => $settings->id,
-            'order' => 5,
+            'parent_id' => $systemSettings->id,
+            'order' => 1,
             'active' => true,
         ]);
-        $roles->roles()->attach([$adminRole->id]);
+        $roles->roles()->attach([$superAdminRole->id]);
 
-        // Sistem - ADMIN ONLY
-        $system = Menu::create([
-            'name' => 'Sistem',
-            'icon' => 'server',
-            'route' => 'system.index',
-            'permission' => 'read settings',
-            'parent_id' => $settings->id,
-            'order' => 6,
-            'active' => false,
+        // Kelola Menu - SUPER ADMIN ONLY (di Sistem Settings)
+        $menuManagement = Menu::create([
+            'name' => 'Kelola Menu',
+            'icon' => 'list',
+            'route' => 'menus.index',
+            'permission' => 'read menus',
+            'parent_id' => $systemSettings->id,
+            'order' => 2,
+            'active' => true,
         ]);
-        $system->roles()->attach([$adminRole->id]);
+        $menuManagement->roles()->attach([$superAdminRole->id]);
+
+        // Menu Role Positions - SUPER ADMIN ONLY (di Sistem Settings)
+        $menuRolePositions = Menu::create([
+            'name' => 'Menu per Role',
+            'icon' => 'users',
+            'route' => 'menu-role-positions.index',
+            'permission' => 'read menu-role-positions',
+            'parent_id' => $systemSettings->id,
+            'order' => 3,
+            'active' => true,
+        ]);
+        $menuRolePositions->roles()->attach([$superAdminRole->id]);
+
+        // ===== PARENT MENU: MANAGEMENT DATA =====
+        // Parent menu untuk management data (System)
+        $managementData = Menu::create([
+            'name' => 'Management Data',
+            'icon' => 'database',
+            'route' => null, // Tidak ada route karena parent
+            'permission' => null, // NULL = semua role bisa lihat parent (tapi children akan di-filter)
+            'order' => 11,
+            'active' => true,
+        ]);
+        $managementData->roles()->attach([$superAdminRole->id]);
+
+        // ===== SUBMENU: SYSTEM (parent_id = $managementData->id) =====
+        // System - Parent menu untuk Users
+        $system = Menu::create([
+            'name' => 'System',
+            'icon' => 'server',
+            'route' => null, // Tidak ada route karena parent
+            'permission' => null, // NULL = semua role bisa lihat parent (tapi children akan di-filter)
+            'parent_id' => $managementData->id,
+            'order' => 1,
+            'active' => true,
+        ]);
+        $system->roles()->attach([$superAdminRole->id]);
+
+        // ===== SUBMENUS OF SYSTEM (parent_id = $system->id) =====
+        // --- Super Admin Only Submenus (Hanya Super Admin yang bisa akses) ---
+        
+        // Kelola User - SUPER ADMIN ONLY
+        $users = Menu::create([
+            'name' => 'Users',
+            'icon' => 'users',
+            'route' => 'users.index',
+            'permission' => 'read users',
+            'parent_id' => $system->id,
+            'order' => 1,
+            'active' => true,
+        ]);
+        $users->roles()->attach([$superAdminRole->id]);
+
+        // Role & Permission sudah dipindahkan ke Sistem Settings (di menu Pengaturan)
 
         
 
@@ -214,8 +366,15 @@ class MenuSeeder extends Seeder
             'order' => 8,
             'active' => true,
         ]);
-        $logout->roles()->attach([$adminRole->id, $staffRole->id]);
+        $logout->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $branchAdminRole->id,
+            $adminProduksiRole->id,
+            $staffProduksiRole->id,
+            $kurirRole->id,
+        ]);
         
-        // DONE! Total: 9 main menus + submenus
+        // DONE! Total: 10 main menus (Dashboard + 8 ERP modules + Settings) + submenus
     }
 }

@@ -21,29 +21,81 @@ class RolePermissionSeeder extends Seeder
             // Dashboard
             'read dashboard',
 
-            // Orders / Pesanan
-            'create orders',
-            'read orders',
-            'update orders',
-            'delete orders',
+            // Purchasing / Pembelian
+            'create purchasing',
+            'read purchasing',
+            'update purchasing',
+            'delete purchasing',
+            'create suppliers',
+            'read suppliers',
+            'update suppliers',
+            'delete suppliers',
 
-            // Products / Produk
-            'create products',
-            'read products',
-            'update products',
-            'delete products',
-
-            // Stock / Stok
+            // Inventory / Inventori
+            'create inventory',
+            'read inventory',
+            'update inventory',
+            'delete inventory',
             'create stock',
             'read stock',
             'update stock',
             'delete stock',
 
-            // Customers / Pelanggan
+            // Manufacturing / Produksi
+            'create manufacturing',
+            'read manufacturing',
+            'update manufacturing',
+            'delete manufacturing',
+
+            // Distribution / Distribusi
+            'create distribution',
+            'read distribution',
+            'update distribution',
+            'delete distribution',
+            'read routes',
+            'update routes',
+
+            // Sales / Penjualan
+            'create orders',
+            'read orders',
+            'update orders',
+            'delete orders',
+            'create sales',
+            'read sales',
+            'update sales',
+            'delete sales',
+
+            // HR & Attendance / HR & Kehadiran
+            'create employees',
+            'read employees',
+            'update employees',
+            'delete employees',
+            'create attendance',
+            'read attendance',
+            'update attendance',
+            'delete attendance',
+            'create shifts',
+            'read shifts',
+            'update shifts',
+            'delete shifts',
+
+            // Finance / Keuangan
+            'create finance',
+            'read finance',
+            'update finance',
+            'delete finance',
+            'read cashflow',
+            'read income',
+            'read expenses',
+            'read profit',
+
+            // CRM
             'create customers',
             'read customers',
             'update customers',
             'delete customers',
+            'read crm',
+            'update crm',
 
             // Reports / Laporan
             'create reports',
@@ -71,8 +123,21 @@ class RolePermissionSeeder extends Seeder
             'read settings',
             'update settings',
 
-            // Audit / Audit Log
+            // Menus / Kelola Menu
+            'read menus',
+            'create menus',
+            'update menus',
+            'delete menus',
 
+            // Menu Role Positions / Menu per Role
+            'read menu-role-positions',
+            'update menu-role-positions',
+
+            // Preferences / Preferensi
+            'read preferences',
+            'update preferences',
+
+            // Permissions
             'read permissions'
         ];
 
@@ -81,59 +146,153 @@ class RolePermissionSeeder extends Seeder
         }
 
         // ===== CREATE ROLES =====
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $superAdminRole = Role::firstOrCreate(['name' => 'super admin']);
         $ownerRole = Role::firstOrCreate(['name' => 'owner']);
-        $staffRole = Role::firstOrCreate(['name' => 'staff']);
-        $courierRole = Role::firstOrCreate(['name' => 'courier']);
-        $customerRole = Role::firstOrCreate(['name' => 'customer']);
+        $branchAdminRole = Role::firstOrCreate(['name' => 'branch admin']);
+        $adminProduksiRole = Role::firstOrCreate(['name' => 'admin produksi']);
+        $staffProduksiRole = Role::firstOrCreate(['name' => 'staff produksi']);
+        $kurirRole = Role::firstOrCreate(['name' => 'kurir']);
 
         // ===== ASSIGN PERMISSIONS TO ROLES =====
 
-        // Admin: Full access
-        $adminRole->syncPermissions($permissions);
+        // Super Admin: Full access to everything
+        $superAdminRole->syncPermissions($permissions);
 
-        // Owner: View-only
+        // Owner: Full read access to all modules, limited write
         $ownerRole->syncPermissions([
             'read dashboard',
-            'read orders',
-            'read products',
+            'read purchasing',
+            'read suppliers',
+            'read inventory',
             'read stock',
+            'read manufacturing',
+            'read distribution',
+            'read routes',
+            'read orders',
+            'read sales',
+            'read employees',
+            'read attendance',
+            'read shifts',
+            'read finance',
+            'read cashflow',
+            'read income',
+            'read expenses',
+            'read profit',
             'read customers',
+            'read crm',
             'read reports',
             'read notifications',
             'read settings',
+            'update settings',
+            'read preferences',
+            'update preferences',
         ]);
 
-        // Staff: Operations (Orders, Products, Stock)
-        $staffRole->syncPermissions([
-            'create orders',
-            'read orders',
-            'update orders',
-            'create products',
-            'read products',
-            'update products',
-            'delete products',
+        // Branch Admin: Full access to branch operations (except system settings)
+        $branchAdminRole->syncPermissions([
+            'read dashboard',
+            'create purchasing',
+            'read purchasing',
+            'update purchasing',
+            'create suppliers',
+            'read suppliers',
+            'update suppliers',
+            'create inventory',
+            'read inventory',
+            'update inventory',
             'create stock',
             'read stock',
             'update stock',
-            'read customers',
-            'update customers',
-            'read notifications',
-            'read settings',
-        ]);
-
-        // Courier: Orders and notifications
-        $courierRole->syncPermissions([
+            'read manufacturing',
+            'create distribution',
+            'read distribution',
+            'update distribution',
+            'read routes',
+            'update routes',
+            'create orders',
             'read orders',
             'update orders',
+            'create sales',
+            'read sales',
+            'update sales',
+            'create employees',
+            'read employees',
+            'update employees',
+            'create attendance',
+            'read attendance',
+            'update attendance',
+            'create shifts',
+            'read shifts',
+            'update shifts',
+            'read finance',
+            'read cashflow',
+            'read income',
+            'read expenses',
+            'read profit',
+            'create customers',
+            'read customers',
+            'update customers',
+            'read crm',
+            'update crm',
+            'read reports',
+            'create reports',
             'read notifications',
             'read settings',
+            'update settings',
+            'read preferences',
+            'update preferences',
         ]);
 
-        // Customer: Limited view
-        $customerRole->syncPermissions([
+        // Admin Produksi: Full access to production and inventory
+        $adminProduksiRole->syncPermissions([
             'read dashboard',
+            'read purchasing',
+            'read suppliers',
+            'create inventory',
+            'read inventory',
+            'update inventory',
+            'create stock',
+            'read stock',
+            'update stock',
+            'create manufacturing',
+            'read manufacturing',
+            'update manufacturing',
+            'read distribution',
             'read orders',
+            'read employees',
+            'read attendance',
+            'read shifts',
+            'read finance',
+            'read notifications',
+            'read settings',
+            'read preferences',
+        ]);
+
+        // Staff Produksi: Limited access to production operations
+        $staffProduksiRole->syncPermissions([
+            'read dashboard',
+            'read inventory',
+            'read stock',
+            'update stock',
+            'create manufacturing',
+            'read manufacturing',
+            'update manufacturing',
+            'read orders',
+            'read attendance',
+            'read notifications',
+            'read settings',
+            'read preferences',
+        ]);
+
+        // Kurir: Access to distribution and orders
+        $kurirRole->syncPermissions([
+            'read dashboard',
+            'read distribution',
+            'read routes',
+            'update routes',
+            'read orders',
+            'update orders',
+            'read customers',
             'read notifications',
             'read settings',
         ]);

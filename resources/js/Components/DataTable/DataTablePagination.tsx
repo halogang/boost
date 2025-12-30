@@ -54,7 +54,7 @@ export function DataTablePagination({
 
   return (
     <div className="flex items-center justify-between">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-gray-600 dark:text-gray-400">
         Menampilkan {from ?? 1} - {to ?? total} dari {total} data
       </p>
       <div className="flex gap-2">
@@ -64,8 +64,8 @@ export function DataTablePagination({
           disabled={currentPage === 1}
           className={`px-3 py-2 rounded-lg text-sm transition ${
             currentPage === 1
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
           }`}
         >
           Sebelumnya
@@ -77,7 +77,7 @@ export function DataTablePagination({
             return (
               <span
                 key={`ellipsis-${index}`}
-                className="px-3 py-2 text-gray-500"
+                className="px-3 py-2 text-gray-500 dark:text-gray-400"
               >
                 ...
               </span>
@@ -90,8 +90,8 @@ export function DataTablePagination({
               onClick={() => onPageChange(page as number)}
               className={`px-3 py-2 rounded-lg text-sm transition ${
                 page === currentPage
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
               {page}

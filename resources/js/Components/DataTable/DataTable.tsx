@@ -98,16 +98,16 @@ export function DataTable<T>({
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-6 py-3 text-left text-sm font-semibold text-gray-900"
+                      className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white"
                     >
                       {header.isPlaceholder
                         ? null
@@ -120,12 +120,12 @@ export function DataTable<T>({
                 </tr>
               ))}
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {isLoading ? (
                 <tr>
                   <td
                     colSpan={columns.length}
-                    className="px-6 py-8 text-center text-gray-500"
+                    className="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
                   >
                     <div className="flex items-center justify-center gap-2">
                       <svg
@@ -154,9 +154,9 @@ export function DataTable<T>({
                 </tr>
               ) : table.getRowModel().rows.length > 0 ? (
                 table.getRowModel().rows.map((row) => (
-                  <tr key={row.id} className="hover:bg-gray-50 transition">
+                  <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
                     {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-6 py-4">
+                      <td key={cell.id} className="px-6 py-4 dark:text-gray-200">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -169,7 +169,7 @@ export function DataTable<T>({
                 <tr>
                   <td
                     colSpan={columns.length}
-                    className="px-6 py-8 text-center text-gray-500"
+                    className="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
                   >
                     {emptyMessage}
                   </td>

@@ -35,11 +35,11 @@ class Menu extends Model
 
     /**
      * Get child menus (submenus)
+     * Show all children (active and inactive) - inactive will be styled differently in frontend
      */
     public function children(): HasMany
     {
         return $this->hasMany(Menu::class, 'parent_id')
-            ->where('active', true)
             ->orderBy('order');
     }
 

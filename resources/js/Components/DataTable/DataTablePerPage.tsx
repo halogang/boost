@@ -13,11 +13,11 @@ export function DataTablePerPage({
 }: DataTablePerPageProps) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-gray-600">Tampilkan</span>
+      <span className="text-sm text-gray-600 dark:text-gray-400">Tampilkan</span>
       <select
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-sm"
+        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition text-sm"
       >
         {options.map((option) => (
           <option key={option} value={option}>
@@ -25,7 +25,7 @@ export function DataTablePerPage({
           </option>
         ))}
       </select>
-      <span className="text-sm text-gray-600">per halaman</span>
+      <span className="text-sm text-gray-600 dark:text-gray-400">per halaman</span>
     </div>
   );
 }

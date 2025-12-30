@@ -22,7 +22,21 @@ interface MobileDrawerProps {
 
 export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerProps) {
   const { url } = usePage();
-  const [expandedMenus, setExpandedMenus] = useState<number[]>([]);
+  
+  // Initialize expanded menus from localStorage
+  const [expandedMenus, setExpandedMenus] = useState<number[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sidebar_expanded_menus');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          return [];
+        }
+      }
+    }
+    return [];
+  });
 
   console.log({menus});
   const isActive = (route: string | null) => {
@@ -31,11 +45,18 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
   };
 
   const toggleSubmenu = (menuId: number) => {
-    setExpandedMenus((prev) =>
-      prev.includes(menuId)
+    setExpandedMenus((prev) => {
+      const newExpanded = prev.includes(menuId)
         ? prev.filter((id) => id !== menuId)
-        : [...prev, menuId]
-    );
+        : [...prev, menuId];
+      
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sidebar_expanded_menus', JSON.stringify(newExpanded));
+      }
+      
+      return newExpanded;
+    });
   };
 
   const getIconSvg = (iconName: string) => {
@@ -55,6 +76,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
       server: 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01',
       eye: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z',
       'log-out': 'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1',
+      'list': 'M4 6h16M4 12h16M4 18h16',
     };
     return icons[iconName] || icons['home'];
   };
@@ -82,11 +104,13 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
         {/* Header */}
         <div className="p-6 border-b border-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center font-bold text-lg">
-              A
-            </div>
+            <img
+              src="/AJIB-DARKAH-INDONESIA.png"
+              alt="Ajib Darkah Indonesia"
+              className="w-10 h-10 object-contain"
+            />
             <div>
-              <h2 className="font-bold text-lg">AquaGalon</h2>
+              <h2 className="font-bold text-lg">Ajib Darkah</h2>
               <p className="text-xs text-gray-400">Delivery System</p>
             </div>
           </div>
@@ -124,7 +148,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
                       !menu.active
                         ? 'opacity-50 cursor-not-allowed text-gray-500'
                         : menu.children.some((child) => isActive(child.route))
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-primary text-primary-foreground'
                         : 'hover:bg-gray-800'
                     }`}
                     disabled={!menu.active}
@@ -145,7 +169,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
                       </svg>
                       <span className="font-medium">{menu.name}</span>
                       {!menu.active && (
-                        <span className="text-[10px] bg-gray-700 px-2 py-0.5 rounded-full">Segera</span>
+                        <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium ml-auto">Segera</span>
                       )}
                     </div>
                     {menu.active && (
@@ -178,7 +202,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
                               onClick={handleLinkClick}
                               className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${
                                 isActive(child.route)
-                                  ? 'bg-blue-600 text-white font-semibold'
+                                  ? 'bg-primary text-primary-foreground font-semibold'
                                   : 'hover:bg-gray-800'
                               }`}
                             >
@@ -216,7 +240,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
                               </svg>
                               {child.name}
                               {!child.active && (
-                                <span className="text-[10px] bg-gray-700 px-2 py-0.5 rounded-full ml-auto">Segera</span>
+                                <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium ml-auto">Segera</span>
                               )}
                             </span>
                           )}
@@ -232,7 +256,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
                   onClick={handleLinkClick}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${
                     isActive(menu.route)
-                      ? 'bg-blue-600 text-white font-semibold'
+                      ? 'bg-primary text-primary-foreground font-semibold'
                       : 'hover:bg-gray-800'
                   }`}
                 >
@@ -268,7 +292,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
                     />
                   </svg>
                   <span className="font-medium">{menu.name}</span>
-                  <span className="text-[10px] bg-gray-700 px-2 py-0.5 rounded-full ml-auto">Segera</span>
+                  <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium ml-auto">Segera</span>
                 </div>
               ) : null}
             </div>

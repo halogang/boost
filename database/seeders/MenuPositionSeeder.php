@@ -16,24 +16,32 @@ class MenuPositionSeeder extends Seeder
         // Clear existing positions
         DB::table('menu_positions')->delete();
 
-        // Get menu IDs by name (since we removed 'key' field)
+        // Get menu IDs by name (all main menus)
         $dashboard = Menu::where('name', 'Dashboard')->first();
-        $orders = Menu::where('name', 'Pesanan')->first();
-        $products = Menu::where('name', 'Produk')->first();
-        $stock = Menu::where('name', 'Stok')->first();
-        $reports = Menu::where('name', 'Laporan')->first();
-        $notifications = Menu::where('name', 'Notifikasi')->first();
+        $purchasing = Menu::where('name', 'Pembelian')->first();
+        $inventory = Menu::where('name', 'Inventori')->first();
+        $manufacturing = Menu::where('name', 'Produksi')->first();
+        $distribution = Menu::where('name', 'Distribusi')->first();
+        $sales = Menu::where('name', 'Penjualan')->first();
+        $hr = Menu::where('name', 'HR & Kehadiran')->first();
+        $finance = Menu::where('name', 'Keuangan')->first();
+        $crm = Menu::where('name', 'CRM')->first();
         $settings = Menu::where('name', 'Pengaturan')->first();
+        $managementData = Menu::where('name', 'Management Data')->first();
 
         // ===== DESKTOP SIDEBAR =====
         // All main menus visible on desktop sidebar
         $desktopMenus = [
             $dashboard,
-            $orders,
-            $products,
-            $stock,
-            $reports,
-            $notifications,
+            $purchasing,
+            $inventory,
+            $manufacturing,
+            $distribution,
+            $sales,
+            $hr,
+            $finance,
+            $crm,
+            $managementData,
             $settings,
         ];
 
@@ -52,9 +60,9 @@ class MenuPositionSeeder extends Seeder
         // ===== MOBILE BOTTOM NAVIGATION (MAX 5 ITEMS) =====
         $mobileBottomMenus = [
             $dashboard,
-            $orders,
-            $notifications,
-            $reports,
+            $purchasing,
+            $sales,
+            $hr,
             $settings,
         ];
 
@@ -72,9 +80,11 @@ class MenuPositionSeeder extends Seeder
 
         // ===== MOBILE DRAWER (SECONDARY/OVERFLOW MENUS) =====
         $mobileDrawerMenus = [
-            $products,
-            $stock,
-            $reports,
+            $inventory,
+            $manufacturing,
+            $distribution,
+            $finance,
+            $crm,
             $settings,
         ];
 

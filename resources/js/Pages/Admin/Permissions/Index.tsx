@@ -32,9 +32,7 @@ export default function RolePermissionManagement({
   groupedPermissions,
 }: Props) {
   const { flash } = usePage().props as any;
-  const [expandedRole, setExpandedRole] = useState<number | null>(
-    roles[0]?.id || null
-  );
+  const [expandedRole, setExpandedRole] = useState<number | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
   const [rolePermissions, setRolePermissions] = useState<{
     [roleId: number]: number[];
@@ -51,20 +49,29 @@ export default function RolePermissionManagement({
     setLoading(key);
 
     try {
+      // Get CSRF token from meta tag or use router helper
+      const csrfToken = document
+        .querySelector('meta[name="csrf-token"]')
+        ?.getAttribute('content') || '';
+
       const response = await fetch('/api/permissions/toggle', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-TOKEN':
-            document
-              .querySelector('meta[name="csrf-token"]')
-              ?.getAttribute('content') || '',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest',
         },
+        credentials: 'same-origin',
         body: JSON.stringify({
           role_id: roleId,
           permission_id: permissionId,
         }),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const data = await response.json();
 
@@ -80,9 +87,13 @@ export default function RolePermissionManagement({
             };
           }
         });
+      } else {
+        console.error('Toggle failed:', data.message || 'Unknown error');
+        alert(data.message || 'Gagal mengubah permission. Silakan coba lagi.');
       }
     } catch (error) {
       console.error('Error toggling permission:', error);
+      alert('Terjadi error saat mengubah permission. Silakan coba lagi.');
     } finally {
       setLoading(null);
     }
@@ -90,23 +101,28 @@ export default function RolePermissionManagement({
 
   return (
     <AdminLayout title="Role & Permission Management">
-      <div className="mb-8">
-        <p className="text-gray-600">
-          Kelola hak akses berdasarkan role. Pilih role untuk melihat dan
-          mengedit permissions.
-        </p>
-      </div>
-
-      {/* Success Message */}
-      {flash?.success && (
-        <div className="mb-6 p-4 bg-green-100 border border-green-300 text-green-700 rounded-lg flex items-center gap-2">
-          <CheckCircle className="w-5 h-5" />
-          {flash.success}
+      <div className="space-y-6">
+        {/* Page Header with Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">
+            Role & Permission Management
+          </h1>
+          <p className="text-base text-gray-600 dark:text-gray-400">
+            Kelola hak akses berdasarkan role. Pilih role untuk melihat dan
+            mengedit permissions.
+          </p>
         </div>
-      )}
 
-      {/* Role Cards */}
-      <div className="space-y-4">
+        {/* Success Message */}
+        {flash?.success && (
+          <div className="p-4 bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 rounded-lg shadow-sm flex items-center gap-2">
+            <CheckCircle className="w-5 h-5" />
+            {flash.success}
+          </div>
+        )}
+
+        {/* Role Cards */}
+        <div className="space-y-4">
         {roles.map((role) => (
           <RoleCard
             key={role.id}
@@ -122,14 +138,15 @@ export default function RolePermissionManagement({
             onTogglePermission={handleToggle}
           />
         ))}
-      </div>
+        </div>
 
-      {/* Info Box */}
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <p className="text-sm text-blue-900">
-          <strong>💡 Tip:</strong> Permissions akan disimpan otomatis saat
-          {/* checkbox di-klik. Tidak perlu klik tombol Save. */}
-        </p>
+        {/* Info Box */}
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm">
+          <p className="text-sm text-blue-900 dark:text-blue-200">
+            <strong>💡 Tip:</strong> Permissions akan disimpan otomatis saat
+            checkbox di-klik. Tidak perlu klik tombol Save.
+          </p>
+        </div>
       </div>
     </AdminLayout>
   );

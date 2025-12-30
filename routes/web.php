@@ -5,6 +5,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\UserProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -43,9 +45,9 @@ Route::middleware(['auth'])->group(function () {
     })->name('roles.index');
     
     // System Settings
-    Route::get('/system', function () {
-        return Inertia::render('Admin/System/Index');
-    })->name('system.index');
+    Route::get('/system', [SettingsController::class, 'index'])->name('system.index');
+    Route::post('/system', [SettingsController::class, 'update'])->name('system.update');
+    Route::get('/api/settings', [SettingsController::class, 'getAll'])->name('settings.getAll');
     
     // Audit Log
     Route::get('/audit', function () {
@@ -54,6 +56,11 @@ Route::middleware(['auth'])->group(function () {
     
     // Menus CRUD
     Route::resource('menus', MenuController::class);
+    Route::post('/menus/{menu}/toggle-active', [MenuController::class, 'toggleActive'])->name('menus.toggle-active');
+    
+    // Menu Role Positions Management
+    Route::get('/menu-role-positions', [\App\Http\Controllers\MenuRolePositionController::class, 'index'])->name('menu-role-positions.index');
+    Route::post('/menu-role-positions/roles/{role}', [\App\Http\Controllers\MenuRolePositionController::class, 'updateRolePositions'])->name('menu-role-positions.update');
     
     // Permissions
     Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
@@ -62,21 +69,62 @@ Route::middleware(['auth'])->group(function () {
 
 // ===== APPLICATION ROUTES =====
 Route::middleware(['auth'])->group(function () {
-    // Orders
+    // Dashboard
     Route::get('/dashboard', function () {
         return Inertia::render('Admin/Dashboard/Index');
     })->name('dashboard');
     
+    // Pembelian (Purchasing)
+    Route::get('/purchasing', function () {
+        return Inertia::render('Purchasing/Index');
+    })->name('purchasing.index');
+    
+    // Inventori (Inventory)
+    Route::get('/inventory', function () {
+        return Inertia::render('Inventory/Index');
+    })->name('inventory.index');
+    
+    // Produksi (Manufacturing)
+    Route::get('/manufacturing', function () {
+        return Inertia::render('Manufacturing/Index');
+    })->name('manufacturing.index');
+    
+    // Distribusi (Distribution)
+    Route::get('/distribution', function () {
+        return Inertia::render('Distribution/Index');
+    })->name('distribution.index');
+    
+    // Penjualan (Sales)
+    Route::get('/sales', function () {
+        return Inertia::render('Sales/Index');
+    })->name('sales.index');
+    
+    // HR & Kehadiran (HR & Attendance)
+    Route::get('/hr', function () {
+        return Inertia::render('HR/Index');
+    })->name('hr.index');
+    
+    // Keuangan (Finance)
+    Route::get('/finance', function () {
+        return Inertia::render('Finance/Index');
+    })->name('finance.index');
+    
+    // CRM
+    Route::get('/crm', function () {
+        return Inertia::render('CRM/Index');
+    })->name('crm.index');
+    
+    // Orders (Legacy - bisa digabung dengan Sales nanti)
     Route::get('/orders', function () {
         return Inertia::render('Orders/Index');
     })->name('orders.index');
     
-    // Products
+    // Products (Legacy - bisa digabung dengan Inventory nanti)
     Route::get('/products', function () {
         return Inertia::render('Products/Index');
     })->name('products.index');
     
-    // Stock
+    // Stock (Legacy - bisa digabung dengan Inventory nanti)
     Route::get('/stock', function () {
         return Inertia::render('Stock/Index');
     })->name('stock.index');
@@ -93,13 +141,9 @@ Route::middleware(['auth'])->group(function () {
     
     // Settings
     Route::prefix('settings')->name('settings.')->group(function () {
-        Route::get('/profile', function () {
-            return Inertia::render('Settings/Profile');
-        })->name('profile');
-        
-        Route::get('/security', function () {
-            return Inertia::render('Settings/Security');
-        })->name('security');
+        Route::get('/profile', [UserProfileController::class, 'index'])->name('profile');
+        Route::put('/profile', [UserProfileController::class, 'updateProfile'])->name('profile.update');
+        Route::put('/password', [UserProfileController::class, 'updatePassword'])->name('password.update');
         
         Route::get('/preferences', function () {
             return Inertia::render('Settings/Preferences');

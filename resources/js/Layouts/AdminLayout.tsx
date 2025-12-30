@@ -1,8 +1,13 @@
-import React, { ReactNode, useState } from 'react';
-import { usePage } from '@inertiajs/react';
+import React, { ReactNode, useEffect, useState } from 'react';
+import { usePage, Link, router } from '@inertiajs/react';
 import Sidebar from './Sidebar';
 import MobileBottomNav from './MobileBottomNav';
 import MobileDrawer from '@/Layouts/MobileDrawer';
+import ThemeToggle from '@/Components/ThemeToggle';
+import { initTheme } from '@/utils/theme';
+import Modal from '@/Components/Modal';
+import { Button } from '@/Components/Button';
+import { useFlashToast } from '@/hooks/useFlashToast';
 
 interface Props {
   children: ReactNode;
@@ -12,8 +17,22 @@ interface Props {
 export default function AdminLayout({ children, title }: Props) {
   const { auth, navigation } = usePage<any>().props;
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
+  // Auto-show toast from flash messages
+  useFlashToast();
+
+  // Initialize theme on mount
+  useEffect(() => {
+    initTheme();
+  }, []);
+
+  const handleLogout = () => {
+    router.post('/logout');
+  };
+
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {/* Desktop Sidebar */}
       <Sidebar />
 
@@ -27,14 +46,14 @@ export default function AdminLayout({ children, title }: Props) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Navigation */}
-        <header className="bg-white border-b border-gray-200 shadow-sm">
+        <header className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 shadow-lg shadow-gray-900/5 sticky top-0 z-40">
           <div className="flex items-center justify-between px-4 md:px-8 py-4">
             {/* Left: Hamburger (Mobile) + Title */}
             <div className="flex items-center gap-4">
               {/* Hamburger Menu Button (Mobile Only) */}
               <button
                 onClick={() => setIsDrawerOpen(true)}
-                className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition"
+                className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
               >
                 <svg
                   className="w-6 h-6 text-gray-600"
@@ -52,20 +71,23 @@ export default function AdminLayout({ children, title }: Props) {
               </button>
 
               <div>
-                <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                   {title || 'Admin Panel'}
                 </h1>
-                <p className="text-xs md:text-sm text-gray-500 hidden sm:block">
+                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
                   Kelola pengaturan sistem dan data master
                 </p>
               </div>
             </div>
 
-            {/* Right: Notification + User Profile */}
+            {/* Right: Theme Toggle + Notification + User Profile */}
             <div className="flex items-center gap-2 md:gap-4">
-              <button className="p-2 hover:bg-gray-100 rounded-lg transition">
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
+              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 relative">
                 <svg
-                  className="w-5 h-5 md:w-6 md:h-6 text-gray-600"
+                  className="w-5 h-5 md:w-6 md:h-6 text-gray-600 dark:text-gray-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -79,41 +101,124 @@ export default function AdminLayout({ children, title }: Props) {
                 </svg>
               </button>
 
-              <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-sm md:text-base">
-                {auth.user?.name.charAt(0).toUpperCase()}
-              </div>
-
-              <div className="hidden md:block">
-                <p className="font-semibold text-gray-900">{auth.user?.name}</p>
-                <div className="flex gap-2 mt-1">
-                  {auth.user?.roles &&
-                  Array.isArray(auth.user.roles) &&
-                  auth.user.roles.length > 0 ? (
-                    auth.user.roles.map((role: any) => (
-                      <span
-                        key={typeof role === 'string' ? role : role.id}
-                        className="inline-block text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-medium"
-                      >
-                        {typeof role === 'string' ? role : role.name}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-xs text-gray-500">User</span>
-                  )}
+              <button
+                onClick={() => setShowProfileModal(true)}
+                className="flex items-center gap-2 md:gap-3 hover:opacity-80 transition cursor-pointer"
+              >
+                <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm md:text-base">
+                  {auth.user?.name.charAt(0).toUpperCase()}
                 </div>
-              </div>
+
+                <div className="hidden md:block text-left">
+                  <p className="font-semibold text-gray-900 dark:text-white">{auth.user?.name}</p>
+                  <div className="flex gap-2 mt-1">
+                    {auth.user?.roles &&
+                    Array.isArray(auth.user.roles) &&
+                    auth.user.roles.length > 0 ? (
+                      auth.user.roles.map((role: any) => (
+                        <span
+                          key={typeof role === 'string' ? role : role.id}
+                          className="inline-block text-xs bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary px-2 py-0.5 rounded font-medium"
+                        >
+                          {typeof role === 'string' ? role : role.name}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">User</span>
+                    )}
+                  </div>
+                </div>
+              </button>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto pb-20 md:pb-0">
+        <main className="flex-1 overflow-auto pb-20 md:pb-0 bg-gray-50 dark:bg-gray-900">
           <div className="p-4 md:p-8">{children}</div>
         </main>
       </div>
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
+
+      {/* Profile Modal */}
+      <Modal show={showProfileModal} onClose={() => setShowProfileModal(false)} maxWidth="md">
+        <div className="p-6">
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="h-16 w-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-2xl">
+              {auth.user?.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                {auth.user?.name}
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {auth.user?.email}
+              </p>
+              <div className="flex gap-2 mt-2">
+                {auth.user?.roles &&
+                Array.isArray(auth.user.roles) &&
+                auth.user.roles.length > 0 ? (
+                  auth.user.roles.map((role: any) => (
+                    <span
+                      key={typeof role === 'string' ? role : role.id}
+                      className="inline-block text-xs bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary px-2 py-1 rounded font-medium"
+                    >
+                      {typeof role === 'string' ? role : role.name}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-xs text-gray-500 dark:text-gray-400">User</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Menu Items */}
+          <div className="space-y-2 mb-6">
+            <Link
+              href="/settings/profile"
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer"
+              onClick={() => setShowProfileModal(false)}
+            >
+              <svg
+                className="w-5 h-5 text-gray-600 dark:text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+              <span className="text-gray-900 dark:text-white font-medium">Profil Saya</span>
+            </Link>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <Button
+              variant="outline"
+              onClick={() => setShowProfileModal(false)}
+              className="flex-1"
+            >
+              Tutup
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleLogout}
+              className="flex-1"
+            >
+              Keluar
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

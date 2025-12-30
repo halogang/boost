@@ -1628,7 +1628,7 @@ php artisan make:test ProductControllerTest --feature
 
 ### Key Environment Variables
 ```
-APP_NAME=AquaGalon
+APP_NAME=Ajib Darkah
 APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://localhost:8000

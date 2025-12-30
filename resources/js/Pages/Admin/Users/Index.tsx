@@ -5,6 +5,7 @@ import { PageHeader } from '@/Components/PageHeader';
 import { breadcrumbPresets } from '@/lib/page-utils';
 import { DataTable, DataTableServerResponse } from '@/Components/DataTable';
 import { userColumns, User } from './columns';
+import { Button } from '@/Components/Button';
 
 interface PaginatedResponse extends DataTableServerResponse<User> {}
 
@@ -48,7 +49,7 @@ export default function Index({ users, roles, filters }: Props) {
   const handleSearchChange = (search: string) => {
     setIsLoading(true);
     router.get(
-      '/admin/users',
+      '/users',
       {
         search: search,
         per_page: filters?.per_page || 10,
@@ -65,7 +66,7 @@ export default function Index({ users, roles, filters }: Props) {
   const handleFilterChange = (filterValues: Record<string, any>) => {
     setIsLoading(true);
     router.get(
-      '/admin/users',
+      '/users',
       {
         search: filters?.search,
         per_page: filters?.per_page || 10,
@@ -81,32 +82,35 @@ export default function Index({ users, roles, filters }: Props) {
 
   return (
     <AdminLayout title="Kelola User">
-      <PageHeader
-        title="Kelola User"
-        description="Manajemen pengguna dan akun sistem"
-        breadcrumbs={breadcrumbPresets.adminUsers()}
-        actions={
-          <Link
-            href="/admin/users/create"
-            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Tambah User
-          </Link>
-        }
-      />
-
-      {/* Success Message */}
-      {flash?.success && (
-        <div className="mb-6 p-4 bg-green-100 border border-green-300 text-green-700 rounded-lg">
-          {flash.success}
+      <div className="space-y-6">
+        {/* Page Header with Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+          <PageHeader
+            title="Kelola User"
+            description="Manajemen pengguna dan akun sistem"
+            breadcrumbs={breadcrumbPresets.adminUsers()}
+            actions={
+              <Link href="/users/create">
+                <Button>
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Tambah User
+                </Button>
+              </Link>
+            }
+          />
         </div>
-      )}
 
-      {/* DataTable */}
-      <DataTable
+        {/* Success Message */}
+        {flash?.success && (
+          <div className="p-4 bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 rounded-lg shadow-sm">
+            {flash.success}
+          </div>
+        )}
+
+        {/* DataTable */}
+        <DataTable
         data={users.data}
         columns={userColumns}
         pagination={{
@@ -132,10 +136,11 @@ export default function Index({ users, roles, filters }: Props) {
             })),
           },
         ]}
-        searchPlaceholder="Cari user berdasarkan nama atau email..."
-        isLoading={isLoading}
-        emptyMessage="Tidak ada user yang ditemukan"
-      />
+            searchPlaceholder="Cari user berdasarkan nama atau email..."
+            isLoading={isLoading}
+            emptyMessage="Tidak ada user yang ditemukan"
+          />
+      </div>
     </AdminLayout>
   );
 }

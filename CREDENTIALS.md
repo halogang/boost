@@ -4,35 +4,41 @@ Setelah menjalankan `php artisan migrate:fresh --seed`, gunakan kredensial berik
 
 ## User Accounts
 
-### 1. Admin (Full Access)
-- **Email:** admin@aquagalon.com
+### 1. Super Admin (Full Access)
+- **Email:** superadmin@ajibdarkah.com
 - **Password:** password
-- **Role:** admin
+- **Role:** super admin
 - **Akses:** Full access ke semua menu dan fitur
 
 ### 2. Owner (View-Only)
-- **Email:** owner@aquagalon.com
+- **Email:** owner@ajibdarkah.com
 - **Password:** password
 - **Role:** owner
 - **Akses:** Dashboard, Orders, Products, Stock, Reports, Notifications (view only)
 
-### 3. Staff (Operations)
-- **Email:** staff@aquagalon.com
+### 3. Branch Admin (Operations)
+- **Email:** branchadmin@ajibdarkah.com
 - **Password:** password
-- **Role:** staff
+- **Role:** branch admin
 - **Akses:** Orders (view & update status), Products (CRUD), Notifications
 
-### 4. Courier (Delivery)
-- **Email:** courier@aquagalon.com
+### 4. Admin Produksi (Production)
+- **Email:** adminproduksi@ajibdarkah.com
 - **Password:** password
-- **Role:** courier
-- **Akses:** Orders (view & update status), Notifications
+- **Role:** admin produksi
+- **Akses:** Production management, Inventory
 
-### 5. Customer (Limited)
-- **Email:** customer@aquagalon.com
+### 5. Staff Produksi (Production Operations)
+- **Email:** staffproduksi@ajibdarkah.com
 - **Password:** password
-- **Role:** customer
-- **Akses:** Dashboard, Orders (view own), Notifications
+- **Role:** staff produksi
+- **Akses:** Production operations
+
+### 6. Kurir (Delivery)
+- **Email:** kurir@ajibdarkah.com
+- **Password:** password
+- **Role:** kurir
+- **Akses:** Orders (view & update status), Notifications
 
 ### 6. Test Admin
 - **Email:** test@admin.com

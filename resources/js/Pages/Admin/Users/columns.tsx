@@ -15,10 +15,10 @@ export const userColumns: ColumnDef<User>[] = [
     header: 'Name',
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
           {row.original.name.charAt(0).toUpperCase()}
         </div>
-        <span className="font-medium text-gray-900">{row.original.name}</span>
+        <span className="font-medium text-gray-900 dark:text-white">{row.original.name}</span>
       </div>
     ),
   },
@@ -26,7 +26,7 @@ export const userColumns: ColumnDef<User>[] = [
     accessorKey: 'email',
     header: 'Email',
     cell: ({ getValue }) => (
-      <span className="text-gray-600">{getValue() as string}</span>
+      <span className="text-gray-600 dark:text-gray-300">{getValue() as string}</span>
     ),
   },
   {
@@ -37,7 +37,7 @@ export const userColumns: ColumnDef<User>[] = [
         {row.original.roles.map((role) => (
           <span
             key={role.id}
-            className="inline-block bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-semibold"
+            className="inline-block bg-primary/10 text-primary text-xs px-3 py-1 rounded-full font-semibold"
           >
             {role.name}
           </span>
@@ -49,7 +49,7 @@ export const userColumns: ColumnDef<User>[] = [
     accessorKey: 'created_at',
     header: 'Dibuat',
     cell: ({ getValue }) => (
-      <span className="text-gray-600 text-sm">
+      <span className="text-gray-600 dark:text-gray-300 text-sm">
         {new Date(getValue() as string).toLocaleDateString('id-ID')}
       </span>
     ),
@@ -61,7 +61,7 @@ export const userColumns: ColumnDef<User>[] = [
       <div className="flex items-center gap-2">
         <Link
           href={`/admin/users/${row.original.id}/edit`}
-          className="text-blue-600 hover:text-blue-800 transition text-sm font-medium"
+          className="text-primary hover:opacity-80 transition text-sm font-medium"
         >
           Edit
         </Link>
