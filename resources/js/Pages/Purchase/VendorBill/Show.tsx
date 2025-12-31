@@ -7,6 +7,7 @@ import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import { useToast } from '@/hooks/useToast';
 import { formatQuantity } from '@/lib/utils';
+import { HintGuide } from '@/Components/HintGuide';
 
 interface AccountMoveLine {
   id: number;
@@ -154,6 +155,33 @@ export default function Show({ bill }: Props) {
             </div>
           </div>
         </div>
+
+        <HintGuide
+          title="Panduan Vendor Bill"
+          items={[
+            {
+              number: 1,
+              title: 'Post Invoice',
+              description: 'Invoice dengan status "Draft" harus di-post terlebih dahulu sebelum dapat diregistrasi pembayaran. Invoice yang sudah Posted akan masuk ke sistem akuntansi.',
+            },
+            {
+              number: 2,
+              title: 'Registrasi Pembayaran',
+              description: 'Setelah invoice di-post, gunakan form "Registrasi Pembayaran" untuk mencatat pembayaran. Dapat dilakukan pembayaran partial atau full sesuai dengan jumlah yang dibayar.',
+            },
+            {
+              number: 3,
+              title: 'Payment Status',
+              description: 'Status akan otomatis update: "Not Paid" (belum ada pembayaran), "Partial" (sebagian dibayar), atau "Paid" (lunas). Sisa tagihan akan otomatis terhitung.',
+            },
+            {
+              number: 4,
+              title: 'Download PDF',
+              description: 'Gunakan tombol "Download PDF" untuk mencetak atau menyimpan dokumen invoice. PDF dapat digunakan untuk keperluan arsip atau pembayaran.',
+            },
+          ]}
+          tips="Pastikan invoice sudah sesuai dengan dokumen dari vendor sebelum di-post. Invoice yang sudah Posted tidak dapat diubah. Catat pembayaran segera setelah invoice diterima untuk menjaga akurasi keuangan."
+        />
 
         {/* Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

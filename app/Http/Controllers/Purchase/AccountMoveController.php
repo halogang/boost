@@ -148,7 +148,13 @@ class AccountMoveController extends Controller
         // - state = 'purchase' (confirmed) atau 'done' (full received)
         // - invoice_status != 'paid' (bisa 'no', null, 'to invoice', atau 'invoiced' untuk partial)
         // - Memiliki order lines
-        $purchaseOrders = PurchaseOrder::whereIn('state', ['purchase', 'done']) // Bisa 'purchase' atau 'done'
+        $perPage = $request->input('per_page', 10);
+        $search = trim($request->input('search', ''));
+        $stateFilter = trim($request->input('state', ''));
+        $yearFilter = trim($request->input('year', ''));
+        $monthFilter = trim($request->input('month', ''));
+
+        $purchaseOrdersQuery = PurchaseOrder::whereIn('state', ['purchase', 'done']) // Bisa 'purchase' atau 'done'
             ->where(function($query) {
                 $query->whereNull('invoice_status')
                       ->orWhere('invoice_status', 'no')
@@ -157,11 +163,66 @@ class AccountMoveController extends Controller
             })
             ->whereHas('orderLines') // Pastikan ada order lines
             ->with(['partner', 'orderLines'])
+            ->when(!empty($search), function ($query) use ($search) {
+                return $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhereHas('partner', function ($partnerQuery) use ($search) {
+                          $partnerQuery->where('name', 'like', "%{$search}%");
+                      });
+                });
+            })
+            ->when(!empty($stateFilter), function ($query) use ($stateFilter) {
+                return $query->where('state', $stateFilter);
+            })
+            ->when(!empty($yearFilter), function ($query) use ($yearFilter) {
+                return $query->whereYear('date_order', $yearFilter);
+            })
+            ->when(!empty($monthFilter), function ($query) use ($monthFilter) {
+                return $query->whereMonth('date_order', $monthFilter);
+            })
+            // Prioritas 1: Invoice Status (yang belum di-invoice atau to invoice di atas)
+            ->orderByRaw("
+                CASE 
+                    WHEN invoice_status = 'to invoice' THEN 1
+                    WHEN invoice_status IS NULL OR invoice_status = 'no' THEN 2
+                    WHEN invoice_status = 'invoiced' THEN 3
+                    ELSE 4
+                END
+            ")
+            // Prioritas 2: State (done = sudah selesai, lebih prioritas untuk di-invoice)
+            ->orderByRaw("
+                CASE 
+                    WHEN state = 'done' THEN 1
+                    WHEN state = 'purchase' THEN 2
+                    ELSE 3
+                END
+            ")
+            // Prioritas 3: Tanggal order terbaru di atas (DESC)
             ->orderBy('date_order', 'desc')
-            ->get();
+            // Prioritas 4: Created at terbaru di atas
+            ->orderBy('created_at', 'desc');
+
+        $purchaseOrders = $purchaseOrdersQuery->paginate($perPage)->withQueryString();
+
+        // Get available years and months for filter
+        $availableYears = PurchaseOrder::selectRaw('YEAR(date_order) as year')
+            ->whereIn('state', ['purchase', 'done'])
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year')
+            ->filter()
+            ->values();
 
         return Inertia::render('Purchase/VendorBill/Create', [
             'purchaseOrders' => $purchaseOrders,
+            'filters' => [
+                'search' => $search,
+                'per_page' => (int) $perPage,
+                'state' => $stateFilter,
+                'year' => $yearFilter,
+                'month' => $monthFilter,
+            ],
+            'availableYears' => $availableYears,
         ]);
     }
 

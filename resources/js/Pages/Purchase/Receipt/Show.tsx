@@ -7,6 +7,7 @@ import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import { useToast } from '@/hooks/useToast';
 import { formatQuantity } from '@/lib/utils';
+import { HintGuide } from '@/Components/HintGuide';
 
 interface StockMove {
   id: number;
@@ -82,7 +83,7 @@ export default function Show({ picking }: Props) {
     <AdminLayout title={`Receipt - ${picking.name}`}>
       <div className="space-y-6">
         {/* Header */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-3 md:p-4 lg:p-6">
           <div className="flex items-center justify-between">
             <div>
               <PageHeader
@@ -109,6 +110,33 @@ export default function Show({ picking }: Props) {
             </div>
           </div>
         </div>
+
+        <HintGuide
+          title="Panduan Terima Barang"
+          items={[
+            {
+              number: 1,
+              title: 'Isi Quantity Diterima',
+              description: 'Untuk setiap produk, isi quantity yang benar-benar diterima di field "Qty Diterima". Quantity tidak boleh melebihi "Sisa" (quantity yang belum diterima).',
+            },
+            {
+              number: 2,
+              title: 'Partial Receipt',
+              description: 'Dapat menerima barang secara partial (sebagian). Sistem akan mencatat quantity yang sudah diterima dan otomatis mengurangi sisa yang belum diterima.',
+            },
+            {
+              number: 3,
+              title: 'Status Receipt',
+              description: 'Setelah semua produk diterima, status akan otomatis berubah menjadi "Received" (Done). Receipt yang sudah selesai tidak dapat diubah.',
+            },
+            {
+              number: 4,
+              title: 'Update PO Status',
+              description: 'Setelah receipt selesai, status Purchase Order akan otomatis update menjadi "Full" jika semua quantity sudah diterima, atau "Partial" jika masih ada sisa.',
+            },
+          ]}
+          tips="Pastikan quantity yang diterima sesuai dengan dokumen pengiriman dari vendor. Periksa kondisi barang sebelum menandai sebagai diterima. Receipt yang sudah selesai akan mempengaruhi status PO dan dapat dibuatkan Vendor Bill."
+        />
 
         {/* Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -5,6 +5,7 @@ import { PageHeader } from '@/Components/PageHeader';
 import { DataTable, DataTableServerResponse } from '@/Components/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
 import { Button } from '@/Components/Button';
+import { HintGuide } from '@/Components/HintGuide';
 
 interface AccountMove {
   id: number;
@@ -250,6 +251,33 @@ export default function Index({ bills, filters, availableYears = [] }: Props) {
             }
           />
         </div>
+
+        <HintGuide
+          title="Panduan Vendor Bill"
+          items={[
+            {
+              number: 1,
+              title: 'Filter & Pencarian',
+              description: 'Gunakan filter Status (Draft/Posted), Payment (Not Paid/Partial/Paid), Tahun, dan Bulan untuk menemukan invoice dengan cepat. Gunakan search untuk mencari berdasarkan nomor invoice atau vendor.',
+            },
+            {
+              number: 2,
+              title: 'Status Invoice',
+              description: 'Draft (baru dibuat, belum di-post), Posted (sudah di-post ke akuntansi), atau Cancel (dibatalkan). Invoice yang sudah Posted tidak dapat diubah.',
+            },
+            {
+              number: 3,
+              title: 'Payment Status',
+              description: 'Not Paid (belum dibayar), Partial (sebagian dibayar), atau Paid (lunas). Status akan otomatis update saat registrasi pembayaran.',
+            },
+            {
+              number: 4,
+              title: 'Post & Payment',
+              description: 'Invoice Draft harus di-post terlebih dahulu sebelum dapat diregistrasi pembayaran. Setelah Posted, gunakan tombol "Registrasi Pembayaran" untuk mencatat pembayaran.',
+            },
+          ]}
+          tips="Pastikan invoice sudah sesuai dengan dokumen dari vendor sebelum di-post. Invoice yang sudah Posted akan masuk ke sistem akuntansi dan tidak dapat diubah."
+        />
 
         <DataTable
           data={bills.data}

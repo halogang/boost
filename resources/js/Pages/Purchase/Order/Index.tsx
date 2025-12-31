@@ -6,6 +6,7 @@ import { DataTable, DataTableServerResponse } from '@/Components/DataTable';
 import { createPurchaseOrderColumns, PurchaseOrder } from './columns';
 import { Button } from '@/Components/Button';
 import { useCrudActions } from '@/hooks/useCrudActions';
+import { HintGuide } from '@/Components/HintGuide';
 
 interface PaginatedResponse extends DataTableServerResponse<PurchaseOrder> {}
 
@@ -130,6 +131,33 @@ export default function Index({ orders, filters, availableYears = [] }: Props) {
             }
           />
         </div>
+
+        <HintGuide
+          title="Panduan RFQ & Purchase Order"
+          items={[
+            {
+              number: 1,
+              title: 'Filter & Pencarian',
+              description: 'Gunakan filter Tipe (RFQ/PO), Status, Tahun, dan Bulan untuk menemukan data dengan cepat. Gunakan search untuk mencari berdasarkan nomor atau vendor.',
+            },
+            {
+              number: 2,
+              title: 'Status RFQ/PO',
+              description: 'Draft (baru dibuat), Sent (terkirim ke vendor), To Approve (menunggu persetujuan), Purchase (PO dikonfirmasi), Done (selesai), atau Cancel (dibatalkan).',
+            },
+            {
+              number: 3,
+              title: 'Konfirmasi RFQ ke PO',
+              description: 'RFQ yang sudah disetujui dapat dikonfirmasi menjadi PO. Setelah dikonfirmasi, sistem akan otomatis membuat Receipt untuk produk storable.',
+            },
+            {
+              number: 4,
+              title: 'Edit & Hapus',
+              description: 'RFQ dengan status "Draft" atau "Sent" dapat diedit. RFQ "Draft" dapat dihapus. PO yang sudah dikonfirmasi tidak dapat diubah.',
+            },
+          ]}
+          tips="Pastikan semua detail produk dan harga sudah benar sebelum mengkonfirmasi RFQ menjadi PO, karena akan mempengaruhi Receipt dan Vendor Bill."
+        />
 
         <DataTable
           data={orders.data}

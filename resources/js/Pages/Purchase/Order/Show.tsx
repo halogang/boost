@@ -5,6 +5,7 @@ import { PageHeader } from '@/Components/PageHeader';
 import { Button } from '@/Components/Button';
 import { useToast } from '@/hooks/useToast';
 import { formatQuantity } from '@/lib/utils';
+import { HintGuide } from '@/Components/HintGuide';
 
 interface PurchaseOrderLine {
   id: number;
@@ -93,7 +94,7 @@ export default function Show({ order }: Props) {
     <AdminLayout title={`${order.name} - ${order.order_type.toUpperCase()}`}>
       <div className="space-y-6">
         {/* Header */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-3 md:p-4 lg:p-6">
           <div className="flex items-center justify-between">
             <div>
               <PageHeader
@@ -134,6 +135,39 @@ export default function Show({ order }: Props) {
             </div>
           </div>
         </div>
+
+        <HintGuide
+          title={`Panduan ${order.order_type.toUpperCase()}`}
+          items={[
+            {
+              number: 1,
+              title: 'Status & Aksi',
+              description: order.order_type === 'rfq' 
+                ? 'RFQ dengan status "Draft" atau "Sent" dapat dikonfirmasi menjadi PO. Setelah dikonfirmasi, sistem akan otomatis membuat Receipt untuk produk storable.'
+                : 'PO yang sudah dikonfirmasi akan otomatis membuat Receipt. Gunakan tombol "Download PDF" untuk mencetak dokumen PO.',
+            },
+            {
+              number: 2,
+              title: 'Edit & Hapus',
+              description: order.order_type === 'rfq'
+                ? 'RFQ dengan status "Draft", "Sent", atau "To Approve" dapat diedit. RFQ "Draft" dapat dihapus. Setelah dikonfirmasi menjadi PO, tidak dapat diubah.'
+                : 'PO yang sudah dikonfirmasi tidak dapat diedit atau dihapus. Pastikan semua detail sudah benar sebelum konfirmasi.',
+            },
+            {
+              number: 3,
+              title: 'Receipt Status',
+              description: 'Lihat status penerimaan barang: "No" (belum ada receipt), "To Receive" (menunggu penerimaan), "Partial" (sebagian diterima), atau "Full" (semua diterima).',
+            },
+            {
+              number: 4,
+              title: 'Invoice Status',
+              description: 'Lihat status invoice: "No" (belum di-invoice), "To Invoice" (menunggu invoice), "Invoiced" (sudah di-invoice), atau "Paid" (sudah dibayar).',
+            },
+          ]}
+          tips={order.order_type === 'rfq' 
+            ? 'Pastikan semua detail produk, quantity, dan harga sudah benar sebelum mengkonfirmasi RFQ menjadi PO, karena tidak dapat diubah setelahnya.'
+            : 'Setelah PO dikonfirmasi, pastikan untuk membuat Receipt saat barang diterima dan Vendor Bill saat invoice diterima dari vendor.'}
+        />
 
         {/* Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

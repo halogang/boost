@@ -7,6 +7,9 @@ import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import { useToast } from '@/hooks/useToast';
 import { formatQuantity } from '@/lib/utils';
+import { HintGuide } from '@/Components/HintGuide';
+import { DataTable, DataTableServerResponse } from '@/Components/DataTable';
+import { ColumnDef } from '@tanstack/react-table';
 
 interface PurchaseOrderLine {
   id: number;
@@ -27,6 +30,9 @@ interface PurchaseOrderLine {
 interface PurchaseOrder {
   id: number;
   name: string;
+  date_order?: string;
+  state?: 'draft' | 'sent' | 'to approve' | 'purchase' | 'done' | 'cancel';
+  invoice_status?: 'no' | 'to invoice' | 'invoiced' | 'paid';
   partner: {
     id: number;
     name: string;
@@ -37,11 +43,131 @@ interface PurchaseOrder {
 
 interface Props {
   purchaseOrder?: PurchaseOrder;
-  purchaseOrders?: PurchaseOrder[];
+  purchaseOrders?: DataTableServerResponse<PurchaseOrder>;
+  filters?: {
+    search?: string;
+    per_page?: number;
+    state?: string;
+    year?: string;
+    month?: string;
+  };
+  availableYears?: number[];
 }
 
-export default function Create({ purchaseOrder, purchaseOrders }: Props) {
+const getMonthOptions = () => {
+  return [
+    { value: '1', label: 'Januari' },
+    { value: '2', label: 'Februari' },
+    { value: '3', label: 'Maret' },
+    { value: '4', label: 'April' },
+    { value: '5', label: 'Mei' },
+    { value: '6', label: 'Juni' },
+    { value: '7', label: 'Juli' },
+    { value: '8', label: 'Agustus' },
+    { value: '9', label: 'September' },
+    { value: '10', label: 'Oktober' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'Desember' },
+  ];
+};
+
+const createPurchaseOrderColumns = (): ColumnDef<PurchaseOrder>[] => [
+  {
+    accessorKey: 'name',
+    header: 'Nomor PO',
+    cell: ({ row }) => (
+      <Link
+        href={`/vendor-bills/create?purchase_id=${row.original.id}`}
+        className="flex items-center gap-3 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+      >
+        <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center font-semibold text-sm text-blue-600 dark:text-blue-400">
+          PO
+        </div>
+        <div>
+          <div className="font-medium text-gray-900 dark:text-white">{row.original.name}</div>
+          {row.original.date_order && (
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              {new Date(row.original.date_order).toLocaleDateString('id-ID')}
+            </div>
+          )}
+        </div>
+      </Link>
+    ),
+  },
+  {
+    accessorKey: 'partner.name',
+    header: 'Vendor',
+    cell: ({ row }) => (
+      <span className="font-medium text-gray-900 dark:text-white">
+        {row.original.partner.name}
+      </span>
+    ),
+  },
+  {
+    accessorKey: 'state',
+    header: 'Status',
+    cell: ({ row }) => {
+      const state = row.original.state || 'purchase';
+      const stateLabels: Record<string, { label: string; color: string }> = {
+        purchase: { label: 'Purchase', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+        done: { label: 'Done', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+      };
+      const stateInfo = stateLabels[state] || { label: state, color: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' };
+      return (
+        <span className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${stateInfo.color}`}>
+          {stateInfo.label}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: 'invoice_status',
+    header: 'Invoice Status',
+    cell: ({ row }) => {
+      const status = row.original.invoice_status || 'no';
+      const statusLabels: Record<string, { label: string; color: string }> = {
+        no: { label: 'Belum Invoice', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
+        'to invoice': { label: 'To Invoice', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+        invoiced: { label: 'Partial', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+        paid: { label: 'Paid', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+      };
+      const statusInfo = statusLabels[status] || { label: status, color: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' };
+      return (
+        <span className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${statusInfo.color}`}>
+          {statusInfo.label}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: 'orderLines',
+    header: 'Jumlah Item',
+    cell: ({ row }) => {
+      const lines = row.original.orderLines || row.original.order_lines || [];
+      return (
+        <span className="text-gray-600 dark:text-gray-400">
+          {lines.length} item
+        </span>
+      );
+    },
+  },
+  {
+    id: 'actions',
+    header: 'Aksi',
+    cell: ({ row }) => (
+      <Link
+        href={`/vendor-bills/create?purchase_id=${row.original.id}`}
+        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+      >
+        Pilih
+      </Link>
+    ),
+  },
+];
+
+export default function Create({ purchaseOrder, purchaseOrders, filters, availableYears }: Props) {
   const { success, error } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   // Normalize orderLines - Laravel sends snake_case, convert to camelCase
   const orderLines = purchaseOrder ? (purchaseOrder.orderLines || purchaseOrder.order_lines || []) : [];
@@ -51,39 +177,150 @@ export default function Create({ purchaseOrder, purchaseOrders }: Props) {
     return (
       <AdminLayout title="Buat Vendor Bill">
         <div className="space-y-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-3 md:p-4 lg:p-6">
             <PageHeader
               title="Buat Vendor Bill"
               description="Pilih Purchase Order untuk dibuatkan invoice"
             />
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Pilih Purchase Order</h3>
-            <div className="space-y-2">
-              {(!purchaseOrders || purchaseOrders.length === 0) ? (
-                <p className="text-gray-500 dark:text-gray-400">Tidak ada PO yang dapat di-invoice</p>
-              ) : (
-                purchaseOrders.map((po) => (
-                  <Link
-                    key={po.id}
-                    href={`/vendor-bills/create?purchase_id=${po.id}`}
-                    className="block p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium text-gray-900 dark:text-white">{po.name}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">{po.partner.name}</div>
-                      </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {(po.orderLines || po.order_lines || []).length} item
-                      </div>
-                    </div>
-                  </Link>
-                ))
-              )}
+          <HintGuide
+            title="Panduan Membuat Vendor Bill"
+            items={[
+              {
+                number: 1,
+                title: 'Pilih Purchase Order',
+                description: 'Pilih PO yang sudah dikonfirmasi dan memiliki produk yang perlu di-invoice. PO dengan status "Purchase" atau "Done" dapat dibuatkan invoice.',
+              },
+              {
+                number: 2,
+                title: 'Metode Invoice',
+                description: 'Pilih "Ordered" untuk invoice berdasarkan quantity yang dipesan, atau "Received" untuk invoice berdasarkan quantity yang sudah diterima (untuk produk storable).',
+              },
+              {
+                number: 3,
+                title: 'Quantity Invoiced',
+                description: 'Sistem akan otomatis menghitung quantity yang belum di-invoice. Invoice partial dapat dibuat jika belum semua quantity di-invoice.',
+              },
+              {
+                number: 4,
+                title: 'Post Invoice',
+                description: 'Setelah invoice dibuat, gunakan tombol "Post" untuk memposting invoice ke sistem akuntansi sebelum dapat diregistrasi pembayaran.',
+              },
+            ]}
+            tips="Pastikan quantity dan harga sudah sesuai dengan dokumen invoice dari vendor. Invoice yang sudah di-post tidak dapat diubah."
+          />
+
+          {purchaseOrders && purchaseOrders.data && purchaseOrders.data.length > 0 ? (
+            <DataTable
+              data={purchaseOrders.data}
+              columns={createPurchaseOrderColumns()}
+              pagination={
+                purchaseOrders.current_page
+                  ? {
+                      current_page: purchaseOrders.current_page,
+                      per_page: purchaseOrders.per_page,
+                      total: purchaseOrders.total,
+                      last_page: purchaseOrders.last_page,
+                      from: purchaseOrders.from,
+                      to: purchaseOrders.to,
+                    }
+                  : undefined
+              }
+              searchValue={filters?.search || ''}
+              onPaginationChange={(page) => {
+                setIsLoading(true);
+                router.get(
+                  '/vendor-bills/create',
+                  {
+                    page,
+                    per_page: filters?.per_page || 10,
+                    search: filters?.search || '',
+                    state: filters?.state || '',
+                    year: filters?.year || '',
+                    month: filters?.month || '',
+                  },
+                  {
+                    preserveState: true,
+                    preserveScroll: false,
+                    onFinish: () => setIsLoading(false),
+                  }
+                );
+              }}
+              onSearchChange={(value) => {
+                setIsLoading(true);
+                router.get(
+                  '/vendor-bills/create',
+                  {
+                    page: 1,
+                    per_page: filters?.per_page || 10,
+                    search: value,
+                    state: filters?.state || '',
+                    year: filters?.year || '',
+                    month: filters?.month || '',
+                  },
+                  {
+                    preserveState: true,
+                    preserveScroll: false,
+                    onFinish: () => setIsLoading(false),
+                  }
+                );
+              }}
+              onFilterChange={(filterValues) => {
+                setIsLoading(true);
+                router.get(
+                  '/vendor-bills/create',
+                  {
+                    page: 1,
+                    per_page: filters?.per_page || 10,
+                    search: filters?.search || '',
+                    state: filterValues.state || '',
+                    year: filterValues.year || '',
+                    month: filterValues.month || '',
+                  },
+                  {
+                    preserveState: true,
+                    preserveScroll: false,
+                    onFinish: () => setIsLoading(false),
+                  }
+                );
+              }}
+              filters={[
+                {
+                  key: 'state',
+                  label: 'Status',
+                  value: filters?.state || '',
+                  placeholder: 'Semua Status',
+                  options: [
+                    { value: 'purchase', label: 'Purchase' },
+                    { value: 'done', label: 'Done' },
+                  ],
+                },
+                {
+                  key: 'year',
+                  label: 'Tahun',
+                  value: filters?.year || '',
+                  placeholder: 'Semua Tahun',
+                  options: (availableYears || []).map((year) => ({ value: year.toString(), label: year.toString() })),
+                },
+                {
+                  key: 'month',
+                  label: 'Bulan',
+                  value: filters?.month || '',
+                  placeholder: 'Semua Bulan',
+                  options: getMonthOptions(),
+                },
+              ]}
+              isLoading={isLoading}
+              emptyMessage="Tidak ada PO yang dapat di-invoice"
+            />
+          ) : (
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-3 md:p-4 lg:p-6">
+              <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+                Tidak ada PO yang dapat di-invoice
+              </p>
             </div>
-          </div>
+          )}
         </div>
       </AdminLayout>
     );
@@ -127,14 +364,41 @@ export default function Create({ purchaseOrder, purchaseOrders }: Props) {
   return (
     <AdminLayout title="Buat Vendor Bill">
       <div className="space-y-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-3 md:p-4 lg:p-6">
           <PageHeader
             title="Buat Vendor Bill"
             description={`Dari PO: ${purchaseOrder.name} • ${purchaseOrder.partner.name}`}
           />
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6 space-y-6">
+        <HintGuide
+          title="Panduan Membuat Vendor Bill"
+          items={[
+            {
+              number: 1,
+              title: 'Metode Invoice',
+              description: 'Pilih "Ordered" untuk invoice berdasarkan quantity yang dipesan, atau "Received" untuk invoice berdasarkan quantity yang sudah diterima (untuk produk storable).',
+            },
+            {
+              number: 2,
+              title: 'Quantity Invoiced',
+              description: 'Sistem akan otomatis menghitung quantity yang belum di-invoice. Quantity yang sudah di-invoice sebelumnya akan dikurangi dari total.',
+            },
+            {
+              number: 3,
+              title: 'Tanggal & Due Date',
+              description: 'Isi tanggal invoice sesuai dengan dokumen dari vendor. Due date akan otomatis terisi berdasarkan payment term vendor (default 30 hari).',
+            },
+            {
+              number: 4,
+              title: 'Post Invoice',
+              description: 'Setelah invoice dibuat, gunakan tombol "Post" untuk memposting invoice ke sistem akuntansi sebelum dapat diregistrasi pembayaran.',
+            },
+          ]}
+          tips="Pastikan semua detail invoice sudah sesuai dengan dokumen dari vendor sebelum menyimpan. Invoice yang sudah di-post tidak dapat diubah."
+        />
+
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-3 md:p-4 lg:p-6 space-y-6">
           {/* Invoice Info */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>

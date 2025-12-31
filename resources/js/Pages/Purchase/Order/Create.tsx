@@ -6,6 +6,7 @@ import { Button } from '@/Components/Button';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import { useToast } from '@/hooks/useToast';
+import { HintGuide } from '@/Components/HintGuide';
 
 interface Product {
   id: number;
@@ -91,14 +92,41 @@ export default function Create({ vendors, products }: Props) {
   return (
     <AdminLayout title="Buat RFQ">
       <div className="space-y-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-3 md:p-4 lg:p-6">
           <PageHeader
             title="Buat Request for Quotation (RFQ)"
             description="Buat RFQ baru untuk meminta penawaran harga dari vendor"
           />
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6 space-y-6">
+        <HintGuide
+          title="Panduan Membuat RFQ"
+          items={[
+            {
+              number: 1,
+              title: 'Pilih Vendor',
+              description: 'Pilih vendor yang akan menerima RFQ. Pastikan vendor sudah terdaftar dan aktif di sistem.',
+            },
+            {
+              number: 2,
+              title: 'Tambah Produk',
+              description: 'Klik "Tambah Baris" untuk menambahkan produk. Pilih produk, isi quantity, harga unit, dan tanggal rencana penerimaan.',
+            },
+            {
+              number: 3,
+              title: 'Harga & Pajak',
+              description: 'Harga unit akan otomatis terisi dari standard price produk. Pajak default 11% (PPN) dapat disesuaikan per baris.',
+            },
+            {
+              number: 4,
+              title: 'Konfirmasi RFQ',
+              description: 'Setelah RFQ dibuat, kirim ke vendor untuk mendapatkan penawaran. Setelah disetujui, konfirmasi menjadi PO.',
+            },
+          ]}
+          tips="Pastikan semua detail produk, quantity, dan harga sudah benar sebelum menyimpan. RFQ dengan status Draft dapat diedit, tetapi setelah dikonfirmasi menjadi PO tidak dapat diubah."
+        />
+
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-3 md:p-4 lg:p-6 space-y-6">
           {/* Vendor & Dates */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>

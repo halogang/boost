@@ -4,6 +4,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { PageHeader } from '@/Components/PageHeader';
 import { DataTable, DataTableServerResponse } from '@/Components/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
+import { HintGuide } from '@/Components/HintGuide';
 
 interface StockPicking {
   id: number;
@@ -205,6 +206,33 @@ export default function Index({ pickings, filters, availableYears = [] }: Props)
             description="Kelola penerimaan barang dari Purchase Order"
           />
         </div>
+
+        <HintGuide
+          title="Panduan Receipt (Goods Receipt)"
+          items={[
+            {
+              number: 1,
+              title: 'Filter & Pencarian',
+              description: 'Gunakan filter Status, Tahun, dan Bulan untuk menemukan receipt dengan cepat. Gunakan search untuk mencari berdasarkan nomor receipt atau Purchase Order.',
+            },
+            {
+              number: 2,
+              title: 'Status Receipt',
+              description: 'Draft (baru dibuat), Waiting (menunggu), Confirmed (dikonfirmasi), Assigned (ditetapkan), Done/Received (sudah diterima), atau Cancel (dibatalkan).',
+            },
+            {
+              number: 3,
+              title: 'Terima Barang',
+              description: 'Klik tombol "Lihat" untuk membuka detail receipt. Di halaman detail, isi quantity yang diterima untuk setiap produk dan klik "Terima Barang".',
+            },
+            {
+              number: 4,
+              title: 'Partial Receipt',
+              description: 'Dapat menerima barang secara partial (sebagian). Sistem akan mencatat quantity yang sudah diterima dan sisa yang belum diterima.',
+            },
+          ]}
+          tips="Pastikan quantity yang diterima sesuai dengan dokumen pengiriman dari vendor. Receipt yang sudah selesai (Done) tidak dapat diubah."
+        />
 
         <DataTable
           data={pickings.data}
