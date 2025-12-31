@@ -1,14 +1,15 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\MenuController;
-use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\Admin\MenuController;
+use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\MenuRolePositionController;
 use App\Http\Controllers\UserProfileController;
-use App\Http\Controllers\UomController;
-use App\Http\Controllers\ProductProductController;
+use App\Http\Controllers\MasterData\UomController;
+use App\Http\Controllers\MasterData\ProductProductController;
 use App\Http\Controllers\Purchase\PurchaseOrderController;
 use App\Http\Controllers\Purchase\StockPickingController;
 use App\Http\Controllers\Purchase\AccountMoveController;
@@ -67,8 +68,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/menus/{menu}/toggle-active', [MenuController::class, 'toggleActive'])->name('menus.toggle-active');
     
     // Menu Role Positions Management
-    Route::get('/menu-role-positions', [\App\Http\Controllers\MenuRolePositionController::class, 'index'])->name('menu-role-positions.index');
-    Route::post('/menu-role-positions/roles/{role}', [\App\Http\Controllers\MenuRolePositionController::class, 'updateRolePositions'])->name('menu-role-positions.update');
+    Route::get('/menu-role-positions', [MenuRolePositionController::class, 'index'])->name('menu-role-positions.index');
+    Route::post('/menu-role-positions/roles/{role}', [MenuRolePositionController::class, 'updateRolePositions'])->name('menu-role-positions.update');
     
     // Permissions
     Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');

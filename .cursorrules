@@ -1,0 +1,306 @@
+# Cursor Rules - Laravel Architecture Guidelines
+
+## Architecture Pattern: Model → Controller → Service
+
+When working on this Laravel project, follow these strict rules:
+
+### 1. Controller Rules
+- Controllers MUST be thin - only handle HTTP request/response
+- NEVER write business logic in controllers
+- ALWAYS delegate business logic to Service classes
+- Use `authorize()` method for permission checks
+- Use Form Request classes for validation (StoreXxxRequest, UpdateXxxRequest)
+- Inject Services via constructor dependency injection
+- Return Inertia responses or redirects only
+
+### 2. Service Rules
+- ALL business logic MUST be in Service classes
+- Services handle database operations and data transformations
+- Services throw exceptions with clear error messages
+- Services return formatted data (models, collections, arrays)
+- Services can inject other Services if needed
+- NEVER handle HTTP request/response in Services
+
+### 3. Model Rules
+- Models contain ONLY: fillable, casts, relationships, scopes
+- NO business logic in models
+- Use scopes for reusable query logic
+- Define relationships clearly
+
+### 4. Policy Rules
+- Use Policies for ALL authorization checks
+- Policies return boolean (true/false)
+- Check permissions using `hasPermissionTo()`
+- Register policies following Laravel conventions (auto-discovery)
+
+### 5. Request Rules
+- Create Form Request classes for validation
+- Use `authorize()` method in Request classes
+- Define validation rules in `rules()` method
+- Naming: `Store{Resource}Request`, `Update{Resource}Request`
+
+### 6. File Structure
+```
+app/
+├── Http/
+│   ├── Controllers/     # Thin controllers, HTTP only
+│   ├── Requests/        # Validation classes
+│   └── Policies/        # Authorization classes
+├── Services/            # Business logic
+└── Models/              # Database layer only
+```
+
+### 7. When Creating New Features
+1. Create Model (if needed) - relationships, scopes only
+2. Create Policy - authorization rules
+3. Create Service - business logic
+4. Create Request classes - validation
+5. Create Controller - thin layer, delegate to Service
+
+### 8. Code Examples
+
+**Controller (DO):**
+```php
+class ProductController extends Controller
+{
+    public function __construct(
+        protected ProductService $productService
+    ) {}
+
+    public function store(StoreProductRequest $request)
+    {
+        $this->productService->createProduct($request->validated());
+        return redirect()->route('products.index');
+    }
+}
+```
+
+**Controller (DON'T):**
+```php
+// ❌ BAD - Business logic in controller
+public function store(Request $request)
+{
+    $validated = $request->validate([...]);
+    Product::create($validated); // ❌ Direct model access
+    // Business logic here... // ❌
+}
+```
+
+**Service (DO):**
+```php
+class ProductService
+{
+    public function createProduct(array $data): Product
+    {
+        // Business logic here
+        return Product::create($data);
+    }
+}
+```
+
+### 9. Exception Handling
+- Services throw exceptions with clear messages
+- Controllers catch and display to users
+- Never expose internal errors to users
+
+### 10. Testing
+- Services are easily testable (no HTTP dependencies)
+- Controllers are thin and easy to test
+- Models are simple and focused
+
+## Remember
+- **Controller = HTTP Layer (Thin)**
+- **Service = Business Logic (Thick)**
+- **Model = Data Layer (Simple)**
+- **Policy = Authorization**
+- **Request = Validation**
+
+Always ask: "Is this business logic?" → If yes, it goes in Service, NOT Controller.
+
+---
+
+## Frontend Reusable Components
+
+### IMPORTANT: Use Existing Reusable Components
+
+This project has **ALREADY BUILT** reusable components. **ALWAYS USE THEM** instead of creating new ones.
+
+### 1. Toast Notification System ✅
+
+**Location**: `resources/js/Components/Toast/` and `resources/js/hooks/useToast.ts`
+
+**ALWAYS use the existing toast system** for notifications:
+
+```tsx
+import { useToast } from '@/hooks/useToast';
+
+function MyComponent() {
+  const { success, error, warning, info } = useToast();
+
+  const handleSave = () => {
+    // ... save logic
+    success('Data berhasil disimpan', 'Perubahan telah disimpan ke database');
+  };
+
+  const handleError = () => {
+    error('Gagal menyimpan', 'Terjadi kesalahan saat menyimpan data');
+  };
+}
+```
+
+**For Laravel flash messages**, use `useFlashToast`:
+```tsx
+import { useFlashToast } from '@/hooks/useFlashToast';
+
+function MyComponent() {
+  useFlashToast(); // Auto-shows toast from Laravel flash messages
+  
+  return <div>...</div>;
+}
+```
+
+**DO NOT** create custom notification components. Use the existing toast system.
+
+### 2. DataTable Component ✅
+
+**Location**: `resources/js/Components/DataTable/`
+
+**ALWAYS use the existing DataTable component** for displaying tabular data:
+
+```tsx
+import { DataTable, DataTableServerResponse } from '@/Components/DataTable';
+
+interface Props {
+  data: DataTableServerResponse<YourType>;
+  filters?: {
+    search?: string;
+    per_page?: number;
+  };
+}
+
+export default function YourPage({ data, filters }: Props) {
+  const columns = [
+    {
+      accessorKey: 'name',
+      header: 'Nama',
+    },
+    // ... more columns
+  ];
+
+  return (
+    <DataTable
+      data={data}
+      columns={columns}
+      searchValue={filters?.search || ''}
+      onSearchChange={(value) => {
+        router.get(route('your.route'), { search: value }, { preserveState: true });
+      }}
+    />
+  );
+}
+```
+
+**Features included**:
+- Search functionality
+- Pagination
+- Per page selector
+- Filters
+- Server-side data handling
+- Loading states
+
+**DO NOT** create custom table components. Use the existing DataTable.
+
+### 3. Utils & Helpers ✅
+
+**Location**: `resources/js/lib/` and `resources/js/utils/`
+
+**ALWAYS check existing utils** before creating new helper functions:
+
+- `resources/js/lib/utils.ts` - General utilities (cn, formatCurrency, etc.)
+- `resources/js/lib/page-utils.ts` - Page utilities (breadcrumbs, etc.)
+- `resources/js/utils/theme.ts` - Theme utilities
+
+**Example**:
+```tsx
+import { cn } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
+import { breadcrumbPresets } from '@/lib/page-utils';
+```
+
+**DO NOT** duplicate utility functions. Check existing utils first.
+
+### 4. Component Structure
+
+When creating new components:
+
+1. **Check if similar component exists** in `resources/js/Components/`
+2. **Use existing reusable components** (Toast, DataTable, etc.)
+3. **Follow existing patterns** from similar pages
+4. **Import from correct paths**:
+   - Components: `@/Components/...`
+   - Hooks: `@/hooks/...`
+   - Utils: `@/lib/...` or `@/utils/...`
+   - Types: `@/types/...`
+
+### 5. Frontend File Structure
+
+```
+resources/js/
+├── Components/
+│   ├── Toast/              ✅ Use for notifications
+│   ├── DataTable/          ✅ Use for tables
+│   ├── ui/                 # shadcn/ui components
+│   └── ...
+├── hooks/
+│   ├── useToast.ts         ✅ Use for toast notifications
+│   ├── useFlashToast.ts    ✅ Use for Laravel flash messages
+│   └── ...
+├── lib/
+│   ├── utils.ts            ✅ General utilities
+│   ├── page-utils.ts       ✅ Page utilities
+│   └── ...
+└── utils/
+    └── theme.ts            ✅ Theme utilities
+```
+
+### 6. Best Practices
+
+**DO:**
+- ✅ Use existing Toast system for all notifications
+- ✅ Use existing DataTable for all tables
+- ✅ Check existing utils before creating new ones
+- ✅ Follow existing component patterns
+- ✅ Import from correct paths using `@/` alias
+
+**DON'T:**
+- ❌ Create custom notification components
+- ❌ Create custom table components
+- ❌ Duplicate existing utility functions
+- ❌ Create components that already exist
+- ❌ Use absolute paths instead of `@/` alias
+
+### 7. Quick Reference
+
+**Toast Notifications**:
+```tsx
+import { useToast } from '@/hooks/useToast';
+const { success, error, warning, info } = useToast();
+```
+
+**DataTable**:
+```tsx
+import { DataTable, DataTableServerResponse } from '@/Components/DataTable';
+```
+
+**Utils**:
+```tsx
+import { cn, formatCurrency } from '@/lib/utils';
+import { breadcrumbPresets } from '@/lib/page-utils';
+```
+
+**Flash Messages**:
+```tsx
+import { useFlashToast } from '@/hooks/useFlashToast';
+useFlashToast(); // Auto-shows Laravel flash messages
+```
+

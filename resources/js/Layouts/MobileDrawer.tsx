@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
+import { cn } from '@/lib/utils';
 
 interface MenuItem {
   id: number;
@@ -23,7 +24,6 @@ interface MobileDrawerProps {
 export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerProps) {
   const { url } = usePage();
   
-  // Initialize expanded menus from localStorage
   const [expandedMenus, setExpandedMenus] = useState<number[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('sidebar_expanded_menus');
@@ -38,10 +38,27 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
     return [];
   });
 
-  console.log({menus});
-  const isActive = (route: string | null) => {
-    if (!route) return false;
-    return url.startsWith(`/${route}`);
+  const isActive = (routeName: string | null) => {
+    if (!routeName) return false;
+    try {
+      const routePath = route(routeName).replace(window.location.origin, '');
+      return url === routePath || url.startsWith(routePath + '/');
+    } catch (e) {
+      const pathFromRoute = routeName.replace(/\./g, '/').replace(/\.index$/, '');
+      const normalizedPath = pathFromRoute.startsWith('/') ? pathFromRoute : `/${pathFromRoute}`;
+      return url === normalizedPath || url.startsWith(normalizedPath + '/');
+    }
+  };
+
+  const hasActiveChild = (children: MenuItem[] | undefined): boolean => {
+    if (!children || children.length === 0) return false;
+    return children.some(child => {
+      if (isActive(child.route)) return true;
+      if (child.children && child.children.length > 0) {
+        return hasActiveChild(child.children);
+      }
+      return false;
+    });
   };
 
   const toggleSubmenu = (menuId: number) => {
@@ -50,7 +67,6 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
         ? prev.filter((id) => id !== menuId)
         : [...prev, menuId];
       
-      // Save to localStorage
       if (typeof window !== 'undefined') {
         localStorage.setItem('sidebar_expanded_menus', JSON.stringify(newExpanded));
       }
@@ -61,21 +77,23 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
 
   const getIconSvg = (iconName: string) => {
     const icons: { [key: string]: string } = {
-      home: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
-      'shopping-cart': 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 9.4a2 2 0 002 2.6h11.6a2 2 0 002-2.6L18 13',
-      box: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4M4 7l8 4M4 7v10l8 4m0-10v10',
-      database: 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 12c0 2.21 3.582 4 8 4s8-1.79 8-4',
-      'file-text': 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-      bell: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9',
-      settings: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z',
-      user: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
-      lock: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
-      sliders: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4',
-      users: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
-      shield: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
-      server: 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01',
-      eye: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z',
+      'home': 'M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 16l-7-4m0 0V5m7 4l7-4',
+      'shopping-cart': 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 8m10 0l2-8',
+      'box': 'M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4v10',
+      'users': 'M12 4.354a4 4 0 110 5.292M15 12H9m6 0a3 3 0 11-6 0 3 3 0 016 0z',
+      'settings': 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M12 15a3 3 0 100-6 3 3 0 000 6z',
+      'lock': 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
+      'database': 'M4 7v10c0 1.1 3.6 2 8 2s8-.9 8-2V7M4 7c0 1.1 3.6 2 8 2s8-.9 8-2m0 5c0 1.1-3.6 2-8 2s-8-.9-8-2',
+      'sliders': 'M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4m-4-2a2 2 0 11-4 0 2 2 0 014 0z',
+      'truck': 'M9 12a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 11-4 0 2 2 0 014 0zM9 12h14m-14 0v8a2 2 0 002 2h10a2 2 0 002-2v-8M9 12V4a2 2 0 012-2h6a2 2 0 012 2v8',
+      'shopping-bag': 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z',
+      'dollar-sign': 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+      'user-circle': 'M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+      'shield': 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+      'server': 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01',
+      'user': 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
       'log-out': 'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1',
+      'bell': 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9',
       'list': 'M4 6h16M4 12h16M4 18h16',
     };
     return icons[iconName] || icons['home'];
@@ -85,24 +103,118 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
     onClose();
   };
 
+  const renderMenuItem = (menu: MenuItem, level: number = 0) => {
+    const hasChildren = menu.children && menu.children.length > 0;
+    const isExpanded = expandedMenus.includes(menu.id);
+    const active = isActive(menu.route);
+    const hasActive = hasActiveChild(menu.children);
+    const isDisabled = !menu.active;
+
+    if (hasChildren) {
+      return (
+        <div key={menu.id} className={cn(level > 0 && 'ml-2')}>
+          <button
+            onClick={() => !isDisabled && toggleSubmenu(menu.id)}
+            disabled={isDisabled}
+            className={cn(
+              'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-200',
+              isDisabled && 'opacity-50 cursor-not-allowed text-gray-500',
+              (hasActive || isExpanded) && !isDisabled && 'bg-blue-600 text-white',
+              !isDisabled && !hasActive && 'text-gray-300 hover:bg-gray-800'
+            )}
+          >
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIconSvg(menu.icon || 'home')} />
+            </svg>
+            <span className="flex-1 text-sm font-medium text-left">{menu.name}</span>
+            {!menu.active && (
+              <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded font-medium">
+                Segera
+              </span>
+            )}
+            {menu.active && (
+              <svg
+                className={cn(
+                  'w-4 h-4 transition-transform duration-200',
+                  isExpanded && 'rotate-180'
+                )}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            )}
+          </button>
+
+          {isExpanded && (
+            <div className="mt-1 ml-4 pl-3 border-l border-gray-700 space-y-1">
+              {menu.children?.map((child) => renderMenuItem(child, level + 1))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (menu.route && menu.active) {
+      return (
+        <Link
+          key={menu.id}
+          href={route(menu.route)}
+          onClick={handleLinkClick}
+          className={cn(
+            'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-200',
+            active && 'bg-blue-600 text-white',
+            !active && 'text-gray-300 hover:bg-gray-800'
+          )}
+        >
+          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIconSvg(menu.icon || 'home')} />
+          </svg>
+          <span className="flex-1 text-sm font-medium">{menu.name}</span>
+        </Link>
+      );
+    }
+
+    if (menu.route && !menu.active) {
+      return (
+        <div
+          key={menu.id}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg opacity-50 cursor-not-allowed text-gray-500"
+        >
+          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIconSvg(menu.icon || 'home')} />
+          </svg>
+          <span className="flex-1 text-sm font-medium">{menu.name}</span>
+          <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded font-medium">
+            Segera
+          </span>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <>
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300"
           onClick={onClose}
         />
       )}
 
       {/* Drawer */}
       <div
-        className={`fixed top-0 left-0 h-full w-80 bg-gray-900 text-white z-50 transform transition-transform duration-300 md:hidden ${
+        className={cn(
+          'fixed top-0 left-0 h-full w-72 bg-gray-900 border-r border-gray-800 text-white z-50 transform transition-transform duration-300 ease-in-out md:hidden',
           isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        )}
       >
         {/* Header */}
-        <div className="p-6 border-b border-gray-700 flex items-center justify-between">
+        <div className="p-5 border-b border-gray-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
               src="/AJIB-DARKAH-INDONESIA.png"
@@ -110,17 +222,17 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
               className="w-10 h-10 object-contain"
             />
             <div>
-              <h2 className="font-bold text-lg">Ajib Darkah</h2>
+              <h2 className="font-semibold text-base">Ajib Darkah</h2>
               <p className="text-xs text-gray-400">Delivery System</p>
             </div>
           </div>
           
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-800 rounded-lg transition"
+            className="p-2 hover:bg-gray-800 rounded-lg transition-colors duration-200"
           >
             <svg
-              className="w-6 h-6"
+              className="w-5 h-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -135,278 +247,27 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
           </button>
         </div>
 
-        {/* Menus */}
-        <nav className="flex-1 p-4 overflow-y-auto max-h-[calc(100vh-100px)]">
-          {menus.map((menu) => (
-            <div key={menu.id} className="mb-2">
-              {menu.children && menu.children.length > 0 ? (
-                // Menu with children (submenu group)
-                <div>
-                  <button
-                    onClick={() => menu.active && toggleSubmenu(menu.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition justify-between ${
-                      !menu.active
-                        ? 'opacity-50 cursor-not-allowed text-gray-500'
-                        : menu.children.some((child) => isActive(child.route))
-                        ? 'bg-primary text-primary-foreground'
-                        : 'hover:bg-gray-800'
-                    }`}
-                    disabled={!menu.active}
-                  >
-                    <div className="flex items-center gap-3">
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d={getIconSvg(menu.icon)}
-                        />
-                      </svg>
-                      <span className="font-medium">{menu.name}</span>
-                      {!menu.active && (
-                        <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium ml-auto">Segera</span>
-                      )}
-                    </div>
-                    {menu.active && (
-                      <svg
-                        className={`w-4 h-4 transition-transform ${
-                          expandedMenus.includes(menu.id) ? 'rotate-180' : ''
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    )}
-                  </button>
-
-                  {/* Submenus */}
-                  {expandedMenus.includes(menu.id) && (
-                    <ul className="ml-4 mt-2 space-y-1 border-l border-gray-700 pl-2">
-                      {menu.children.map((child) => (
-                        <li key={child.id}>
-                          {/* Check if child has children (nested submenu) */}
-                          {child.children && child.children.length > 0 ? (
-                            <div>
-                              <button
-                                onClick={() => child.active && toggleSubmenu(child.id)}
-                                className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition justify-between ${
-                                  !child.active
-                                    ? 'opacity-50 cursor-not-allowed text-gray-500'
-                                    : child.children.some((grandChild) => isActive(grandChild.route))
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'hover:bg-gray-800'
-                                }`}
-                                disabled={!child.active}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <svg
-                                    className="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d={getIconSvg(child.icon)}
-                                    />
-                                  </svg>
-                                  <span>{child.name}</span>
-                                  {!child.active && (
-                                    <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium ml-auto">Segera</span>
-                                  )}
-                                </div>
-                                {child.active && (
-                                  <svg
-                                    className={`w-3 h-3 transition-transform ${
-                                      expandedMenus.includes(child.id) ? 'rotate-180' : ''
-                                    }`}
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M19 9l-7 7-7-7"
-                                    />
-                                  </svg>
-                                )}
-                              </button>
-                              {/* Nested children (level 3) */}
-                              {expandedMenus.includes(child.id) && child.children && (
-                                <ul className="ml-4 mt-1 space-y-1 border-l border-gray-700 pl-2">
-                                  {child.children.map((grandChild) => (
-                                    <li key={grandChild.id}>
-                                      {grandChild.route && grandChild.active ? (
-                                        <Link
-                                          href={route(grandChild.route)}
-                                          onClick={handleLinkClick}
-                                          className={`flex items-center gap-3 px-4 py-2 rounded-lg text-xs transition ${
-                                            isActive(grandChild.route)
-                                              ? 'bg-primary text-primary-foreground font-semibold'
-                                              : 'hover:bg-gray-800'
-                                          }`}
-                                        >
-                                          <svg
-                                            className="w-3 h-3"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                          >
-                                            <path
-                                              strokeLinecap="round"
-                                              strokeLinejoin="round"
-                                              strokeWidth={2}
-                                              d={getIconSvg(grandChild.icon)}
-                                            />
-                                          </svg>
-                                          {grandChild.name}
-                                        </Link>
-                                      ) : (
-                                        <span className={`flex items-center gap-3 px-4 py-2 rounded-lg text-xs ${
-                                          !grandChild.active ? 'text-gray-500 opacity-50 cursor-not-allowed' : 'text-gray-400'
-                                        }`}>
-                                          <svg
-                                            className="w-3 h-3"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                          >
-                                            <path
-                                              strokeLinecap="round"
-                                              strokeLinejoin="round"
-                                              strokeWidth={2}
-                                              d={getIconSvg(grandChild.icon)}
-                                            />
-                                          </svg>
-                                          {grandChild.name}
-                                          {!grandChild.active && (
-                                            <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium ml-auto">Segera</span>
-                                          )}
-                                        </span>
-                                      )}
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
-                            </div>
-                          ) : child.route && child.active ? (
-                            <Link
-                              href={route(child.route)}
-                              onClick={handleLinkClick}
-                              className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${
-                                isActive(child.route)
-                                  ? 'bg-primary text-primary-foreground font-semibold'
-                                  : 'hover:bg-gray-800'
-                              }`}
-                            >
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d={getIconSvg(child.icon)}
-                                />
-                              </svg>
-                              {child.name}
-                            </Link>
-                          ) : (
-                            <span className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm ${
-                              !child.active ? 'text-gray-500 opacity-50 cursor-not-allowed' : 'text-gray-400'
-                            }`}>
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d={getIconSvg(child.icon)}
-                                />
-                              </svg>
-                              {child.name}
-                              {!child.active && (
-                                <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium ml-auto">Segera</span>
-                              )}
-                            </span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ) : menu.route && menu.active ? (
-                // Regular menu with route (active)
-                <Link
-                  href={route(menu.route)}
-                  onClick={handleLinkClick}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${
-                    isActive(menu.route)
-                      ? 'bg-primary text-primary-foreground font-semibold'
-                      : 'hover:bg-gray-800'
-                  }`}
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d={getIconSvg(menu.icon)}
-                    />
-                  </svg>
-                  <span className="font-medium">{menu.name}</span>
-                </Link>
-              ) : menu.route && !menu.active ? (
-                // Regular menu with route (inactive/disabled)
-                <div className="flex items-center gap-3 px-4 py-3 rounded-lg opacity-50 cursor-not-allowed text-gray-500">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d={getIconSvg(menu.icon)}
-                    />
-                  </svg>
-                  <span className="font-medium">{menu.name}</span>
-                  <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium ml-auto">Segera</span>
-                </div>
-              ) : null}
-            </div>
-          ))}
+        {/* Navigation */}
+        <nav className="flex-1 p-3 overflow-y-auto space-y-1">
+          {menus.map((menu) => renderMenuItem(menu))}
         </nav>
+
+        {/* Logout */}
+        <div className="p-3 border-t border-gray-800">
+          <button
+            onClick={() => {
+              if (confirm('Apakah Anda yakin ingin keluar?')) {
+                window.location.href = '/logout';
+              }
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-red-400 transition-colors duration-200"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span className="text-sm font-medium">Keluar</span>
+          </button>
+        </div>
       </div>
     </>
   );
