@@ -71,16 +71,16 @@ class MenuSeeder extends Seeder
             $staffPengantaranRole->id,
         ]);
 
-        // Pembelian (Purchasing) - Supplier management and raw material procurement
-        $purchasing = Menu::create([
+        // Pembelian (Purchasing) - Main menu untuk transaksi pembelian
+        $purchasingMain = Menu::create([
             'name' => 'Pembelian',
             'icon' => 'shopping-cart',
-            'route' => 'purchasing.index',
-            'permission' => 'read purchasing',
+            'route' => null, // Parent menu
+            'permission' => null,
             'order' => 2,
-            'active' => false, // Nonaktifkan sementara - akan dibuat untuk client
+            'active' => true,
         ]);
-        $purchasing->roles()->attach([
+        $purchasingMain->roles()->attach([
             $superAdminRole->id,
             $ownerRole->id,
             $managerRole->id,
@@ -399,9 +399,76 @@ class MenuSeeder extends Seeder
             $adminRole->id,
         ]);
 
+        // Product (Product Product) - Master Data
+        $product = Menu::create([
+            'name' => 'Produk',
+            'icon' => 'box',
+            'route' => 'products.index',
+            'permission' => 'read product',
+            'parent_id' => $pembelianMaster->id,
+            'order' => 2,
+            'active' => true,
+        ]);
+        $product->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $managerRole->id,
+            $adminRole->id,
+        ]);
+
         // Role & Permission sudah dipindahkan ke Sistem Settings (di menu Pengaturan)
 
-        
+        // ===== PARENT MENU: PEMBELIAN (Transaksi) =====
+        // RFQ & PO
+        $rfqPo = Menu::create([
+            'name' => 'RFQ & PO',
+            'icon' => 'file-text',
+            'route' => 'purchase-orders.index',
+            'permission' => 'read purchasing',
+            'parent_id' => $purchasingMain->id,
+            'order' => 1,
+            'active' => true,
+        ]);
+        $rfqPo->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $managerRole->id,
+            $adminRole->id,
+        ]);
+
+        // Receipt (Goods Receipt)
+        $receipt = Menu::create([
+            'name' => 'Receipt',
+            'icon' => 'package',
+            'route' => 'receipts.index',
+            'permission' => 'read inventory',
+            'parent_id' => $purchasingMain->id,
+            'order' => 2,
+            'active' => true,
+        ]);
+        $receipt->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $managerRole->id,
+            $adminRole->id,
+        ]);
+
+        // Vendor Bill
+        $vendorBill = Menu::create([
+            'name' => 'Vendor Bill',
+            'icon' => 'receipt',
+            'route' => 'vendor-bills.index',
+            'permission' => 'read finance',
+            'parent_id' => $purchasingMain->id,
+            'order' => 3,
+            'active' => true,
+        ]);
+        $vendorBill->roles()->attach([
+            $superAdminRole->id,
+            $ownerRole->id,
+            $managerRole->id,
+            $adminRole->id,
+        ]);
 
         // --- Public Submenu (Logout) ---
         

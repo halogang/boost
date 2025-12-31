@@ -112,6 +112,25 @@ export function formatNumber(num: number, decimals: number = 0): string {
 }
 
 /**
+ * Format quantity - always shows 3 decimal places to avoid confusion
+ * In Indonesia, "1.000" means one thousand (thousand separator)
+ * But in our system, "1.000" means one unit with 3 decimal precision
+ * So we always show 3 decimals to make it clear it's a decimal, not thousand
+ * @param qty - Quantity to format
+ * @param maxDecimals - Maximum decimal places (default: 3)
+ * @returns Formatted quantity string with 3 decimals
+ */
+export function formatQuantity(qty: number, maxDecimals: number = 3): string {
+  // Always show 3 decimal places to avoid confusion
+  // "1.000" will be displayed as "1,000" (Indonesian format with comma as decimal)
+  // This makes it clear it's 1 unit with 3 decimal precision, not 1000 units
+  return qty.toLocaleString('id-ID', {
+    minimumFractionDigits: maxDecimals,
+    maximumFractionDigits: maxDecimals,
+  });
+}
+
+/**
  * Format file size to human readable
  * @param bytes - File size in bytes
  * @returns Formatted file size

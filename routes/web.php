@@ -8,6 +8,10 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\UomController;
+use App\Http\Controllers\ProductProductController;
+use App\Http\Controllers\Purchase\PurchaseOrderController;
+use App\Http\Controllers\Purchase\StockPickingController;
+use App\Http\Controllers\Purchase\AccountMoveController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -156,6 +160,29 @@ Route::middleware(['auth'])->group(function () {
 
     // Master Data - UOM (Unit of Measure)
     Route::resource('uoms', UomController::class);
+    
+    // Master Data - Product (Product Product)
+    Route::resource('products', ProductProductController::class);
+
+    // Purchase - RFQ & PO
+    Route::resource('purchase-orders', PurchaseOrderController::class);
+    Route::post('/purchase-orders/{purchaseOrder}/confirm', [PurchaseOrderController::class, 'confirm'])->name('purchase-orders.confirm');
+    Route::get('/purchase-orders/{purchaseOrder}/pdf', [PurchaseOrderController::class, 'downloadPdf'])->name('purchase-orders.pdf');
+
+    // Purchase - Receipt (Stock Picking)
+    Route::get('/receipts', [StockPickingController::class, 'index'])->name('receipts.index');
+    Route::get('/receipts/{stockPicking}', [StockPickingController::class, 'show'])->name('receipts.show');
+    Route::post('/receipts/{stockPicking}/receive', [StockPickingController::class, 'receive'])->name('receipts.receive');
+    Route::get('/receipts/{stockPicking}/pdf', [StockPickingController::class, 'downloadPdf'])->name('receipts.pdf');
+
+    // Purchase - Vendor Bill
+    Route::get('/vendor-bills', [AccountMoveController::class, 'index'])->name('vendor-bills.index');
+    Route::get('/vendor-bills/create', [AccountMoveController::class, 'create'])->name('vendor-bills.create');
+    Route::post('/vendor-bills', [AccountMoveController::class, 'store'])->name('vendor-bills.store');
+    Route::get('/vendor-bills/{accountMove}', [AccountMoveController::class, 'show'])->name('vendor-bills.show');
+    Route::post('/vendor-bills/{accountMove}/post', [AccountMoveController::class, 'post'])->name('vendor-bills.post');
+    Route::post('/vendor-bills/{accountMove}/payment', [AccountMoveController::class, 'registerPayment'])->name('vendor-bills.payment');
+    Route::get('/vendor-bills/{accountMove}/pdf', [AccountMoveController::class, 'downloadPdf'])->name('vendor-bills.pdf');
 });
 
 require __DIR__.'/auth.php';

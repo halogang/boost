@@ -36,6 +36,12 @@ class RolePermissionSeeder extends Seeder
             'read uom',
             'update uom',
             'delete uom',
+            
+            // Product (Product Product) / Produk
+            'create product',
+            'read product',
+            'update product',
+            'delete product',
 
             // Inventory / Inventori
             'create inventory',
@@ -194,6 +200,7 @@ class RolePermissionSeeder extends Seeder
             'read preferences',
             'update preferences',
             'read uom',
+            'read product',
         ]);
 
         // Manager: Full access to branch operations (except system settings)
@@ -252,6 +259,9 @@ class RolePermissionSeeder extends Seeder
             'create uom',
             'read uom',
             'update uom',
+            'create product',
+            'read product',
+            'update product',
         ]);
 
         // Spv: Supervisor access with oversight capabilities
@@ -285,6 +295,7 @@ class RolePermissionSeeder extends Seeder
             'read settings',
             'read preferences',
             'read uom',
+            'read product',
         ]);
 
         // Admin: Full access to production and inventory
@@ -313,6 +324,7 @@ class RolePermissionSeeder extends Seeder
             'create uom',
             'read uom',
             'update uom',
+            'read product',
         ]);
 
         // Staff Pengantaran: Access to distribution and orders

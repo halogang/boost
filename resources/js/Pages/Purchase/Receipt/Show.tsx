@@ -6,6 +6,7 @@ import { Button } from '@/Components/Button';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import { useToast } from '@/hooks/useToast';
+import { formatQuantity } from '@/lib/utils';
 
 interface StockMove {
   id: number;
@@ -73,6 +74,10 @@ export default function Show({ picking }: Props) {
   const canReceive = ['confirmed', 'assigned'].includes(picking.state);
   const isDone = picking.state === 'done';
 
+  const handleDownloadPdf = () => {
+    window.open(`/receipts/${picking.id}/pdf`, '_blank');
+  };
+
   return (
     <AdminLayout title={`Receipt - ${picking.name}`}>
       <div className="space-y-6">
@@ -90,6 +95,12 @@ export default function Show({ picking }: Props) {
               />
             </div>
             <div className="flex items-center gap-3">
+              <Button variant="outline" onClick={handleDownloadPdf}>
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Download PDF
+              </Button>
               <Link href="/receipts">
                 <Button variant="outline">
                   Kembali
@@ -151,8 +162,8 @@ export default function Show({ picking }: Props) {
                           {move.product.default_code} • {move.uom?.name || '-'}
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          Dipesan: {move.product_uom_qty.toLocaleString('id-ID', { maximumFractionDigits: 3 })} • 
-                          Sisa: {remainingQty.toLocaleString('id-ID', { maximumFractionDigits: 3 })}
+                          Dipesan: {formatQuantity(move.product_uom_qty)} • 
+                          Sisa: {formatQuantity(remainingQty)}
                         </div>
                       </div>
                       <div>
@@ -176,7 +187,7 @@ export default function Show({ picking }: Props) {
                         />
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">
-                        Max: {remainingQty.toLocaleString('id-ID', { maximumFractionDigits: 3 })}
+                        Max: {formatQuantity(remainingQty)}
                       </div>
                     </div>
                   </div>
@@ -218,10 +229,10 @@ export default function Show({ picking }: Props) {
                         </div>
                       </td>
                       <td className="py-3 px-4 text-right text-gray-900 dark:text-white">
-                        {move.product_uom_qty.toLocaleString('id-ID', { maximumFractionDigits: 3 })}
+                        {formatQuantity(move.product_uom_qty)}
                       </td>
                       <td className="py-3 px-4 text-right font-semibold text-gray-900 dark:text-white">
-                        {move.quantity_done.toLocaleString('id-ID', { maximumFractionDigits: 3 })}
+                        {formatQuantity(move.quantity_done)}
                       </td>
                       <td className="py-3 px-4 text-gray-900 dark:text-white">
                         {move.uom?.name || '-'}

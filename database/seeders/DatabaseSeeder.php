@@ -33,5 +33,11 @@ class DatabaseSeeder extends Seeder
 
         // 6. Seed UOM (Unit of Measure)
         $this->call(UomSeeder::class);
+
+        // 7. Seed Product Product (Products)
+        $this->call(ProductProductSeeder::class);
+
+        // 8. Seed Res Partner (Vendors/Suppliers)
+        $this->call(ResPartnerSeeder::class);
     }
 }
