@@ -29,7 +29,10 @@ interface Props {
     search?: string;
     per_page?: number;
     state?: string;
+    year?: string;
+    month?: string;
   };
+  availableYears?: number[];
 }
 
 const createReceiptColumns = (): ColumnDef<StockPicking>[] => [
@@ -113,7 +116,22 @@ const createReceiptColumns = (): ColumnDef<StockPicking>[] => [
   },
 ];
 
-export default function Index({ pickings, filters }: Props) {
+const monthOptions = [
+  { value: '1', label: 'Januari' },
+  { value: '2', label: 'Februari' },
+  { value: '3', label: 'Maret' },
+  { value: '4', label: 'April' },
+  { value: '5', label: 'Mei' },
+  { value: '6', label: 'Juni' },
+  { value: '7', label: 'Juli' },
+  { value: '8', label: 'Agustus' },
+  { value: '9', label: 'September' },
+  { value: '10', label: 'Oktober' },
+  { value: '11', label: 'November' },
+  { value: '12', label: 'Desember' },
+];
+
+export default function Index({ pickings, filters, availableYears = [] }: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
   const receiptColumns = createReceiptColumns();
@@ -127,6 +145,8 @@ export default function Index({ pickings, filters }: Props) {
         per_page: pageSize,
         search: filters?.search || '',
         state: filters?.state || '',
+        year: filters?.year || '',
+        month: filters?.month || '',
       },
       {
         preserveState: true,
@@ -145,6 +165,8 @@ export default function Index({ pickings, filters }: Props) {
         per_page: filters?.per_page || 10,
         search: search || '',
         state: filters?.state || '',
+        year: filters?.year || '',
+        month: filters?.month || '',
       },
       {
         preserveState: true,
@@ -163,6 +185,8 @@ export default function Index({ pickings, filters }: Props) {
         per_page: filters?.per_page || 10,
         search: filters?.search || '',
         state: filterValues.state || '',
+        year: filterValues.year || '',
+        month: filterValues.month || '',
       },
       {
         preserveState: true,
@@ -175,7 +199,7 @@ export default function Index({ pickings, filters }: Props) {
   return (
     <AdminLayout title="Receipt (Goods Receipt)">
       <div className="space-y-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-3 md:p-4 lg:p-6">
           <PageHeader
             title="Receipt (Goods Receipt)"
             description="Kelola penerimaan barang dari Purchase Order"
@@ -210,6 +234,23 @@ export default function Index({ pickings, filters }: Props) {
                 { value: 'assigned', label: 'Assigned' },
                 { value: 'done', label: 'Received' },
               ],
+            },
+            {
+              key: 'year',
+              label: 'Tahun',
+              value: filters?.year || '',
+              placeholder: 'Semua Tahun',
+              options: availableYears.map((year) => ({
+                value: year.toString(),
+                label: year.toString(),
+              })),
+            },
+            {
+              key: 'month',
+              label: 'Bulan',
+              value: filters?.month || '',
+              placeholder: 'Semua Bulan',
+              options: monthOptions,
             },
           ]}
           searchPlaceholder="Cari berdasarkan nomor receipt atau PO..."

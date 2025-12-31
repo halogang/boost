@@ -35,7 +35,10 @@ interface Props {
     per_page?: number;
     state?: string;
     payment_state?: string;
+    year?: string;
+    month?: string;
   };
+  availableYears?: number[];
 }
 
 const createVendorBillColumns = (): ColumnDef<AccountMove>[] => [
@@ -147,7 +150,22 @@ const createVendorBillColumns = (): ColumnDef<AccountMove>[] => [
   },
 ];
 
-export default function Index({ bills, filters }: Props) {
+const monthOptions = [
+  { value: '1', label: 'Januari' },
+  { value: '2', label: 'Februari' },
+  { value: '3', label: 'Maret' },
+  { value: '4', label: 'April' },
+  { value: '5', label: 'Mei' },
+  { value: '6', label: 'Juni' },
+  { value: '7', label: 'Juli' },
+  { value: '8', label: 'Agustus' },
+  { value: '9', label: 'September' },
+  { value: '10', label: 'Oktober' },
+  { value: '11', label: 'November' },
+  { value: '12', label: 'Desember' },
+];
+
+export default function Index({ bills, filters, availableYears = [] }: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
   const billColumns = createVendorBillColumns();
@@ -162,6 +180,8 @@ export default function Index({ bills, filters }: Props) {
         search: filters?.search || '',
         state: filters?.state || '',
         payment_state: filters?.payment_state || '',
+        year: filters?.year || '',
+        month: filters?.month || '',
       },
       {
         preserveState: true,
@@ -181,6 +201,8 @@ export default function Index({ bills, filters }: Props) {
         search: search || '',
         state: filters?.state || '',
         payment_state: filters?.payment_state || '',
+        year: filters?.year || '',
+        month: filters?.month || '',
       },
       {
         preserveState: true,
@@ -200,6 +222,8 @@ export default function Index({ bills, filters }: Props) {
         search: filters?.search || '',
         state: filterValues.state || '',
         payment_state: filterValues.payment_state || '',
+        year: filterValues.year || '',
+        month: filterValues.month || '',
       },
       {
         preserveState: true,
@@ -212,7 +236,7 @@ export default function Index({ bills, filters }: Props) {
   return (
     <AdminLayout title="Vendor Bill">
       <div className="space-y-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-3 md:p-4 lg:p-6">
           <PageHeader
             title="Vendor Bill"
             description="Kelola invoice pembelian dari vendor"
@@ -252,6 +276,23 @@ export default function Index({ bills, filters }: Props) {
                 { value: 'draft', label: 'Draft' },
                 { value: 'posted', label: 'Posted' },
               ],
+            },
+            {
+              key: 'year',
+              label: 'Tahun',
+              value: filters?.year || '',
+              placeholder: 'Semua Tahun',
+              options: availableYears.map((year) => ({
+                value: year.toString(),
+                label: year.toString(),
+              })),
+            },
+            {
+              key: 'month',
+              label: 'Bulan',
+              value: filters?.month || '',
+              placeholder: 'Semua Bulan',
+              options: monthOptions,
             },
             {
               key: 'payment_state',

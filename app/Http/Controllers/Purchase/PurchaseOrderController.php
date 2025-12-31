@@ -34,6 +34,8 @@ class PurchaseOrderController extends Controller
         $search = trim($request->input('search', ''));
         $typeFilter = trim($request->input('type', '')); // rfq atau po
         $stateFilter = trim($request->input('state', ''));
+        $yearFilter = trim($request->input('year', ''));
+        $monthFilter = trim($request->input('month', ''));
 
         $orders = PurchaseOrder::query()
             ->with(['partner', 'user'])
@@ -55,10 +57,26 @@ class PurchaseOrderController extends Controller
             ->when(!empty($stateFilter), function ($query) use ($stateFilter) {
                 return $query->where('state', $stateFilter);
             })
-            ->orderBy('date_order', 'desc')
-            ->orderBy('created_at', 'desc')
+            ->when(!empty($yearFilter), function ($query) use ($yearFilter) {
+                return $query->whereYear('date_order', $yearFilter);
+            })
+            ->when(!empty($monthFilter), function ($query) use ($monthFilter) {
+                return $query->whereMonth('date_order', $monthFilter);
+            })
+            ->orderByRaw('YEAR(date_order) DESC')
+            ->orderByRaw('MONTH(date_order) DESC')
+            ->orderBy('date_order', 'asc') // Tanggal lama di bawah
+            ->orderBy('created_at', 'asc')
             ->paginate($perPage)
             ->withQueryString();
+
+        // Get available years and months for filter
+        $availableYears = PurchaseOrder::selectRaw('YEAR(date_order) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year')
+            ->filter()
+            ->values();
 
         return Inertia::render('Purchase/Order/Index', [
             'orders' => $orders,
@@ -67,7 +85,10 @@ class PurchaseOrderController extends Controller
                 'per_page' => (int) $perPage,
                 'type' => $typeFilter,
                 'state' => $stateFilter,
+                'year' => $yearFilter,
+                'month' => $monthFilter,
             ],
+            'availableYears' => $availableYears,
         ]);
     }
 

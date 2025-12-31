@@ -29,6 +29,8 @@ class AccountMoveController extends Controller
         $search = trim($request->input('search', ''));
         $stateFilter = trim($request->input('state', ''));
         $paymentStateFilter = trim($request->input('payment_state', ''));
+        $yearFilter = trim($request->input('year', ''));
+        $monthFilter = trim($request->input('month', ''));
 
         $bills = AccountMove::query()
             ->vendorBills()
@@ -54,8 +56,16 @@ class AccountMoveController extends Controller
             ->when(!empty($paymentStateFilter), function ($query) use ($paymentStateFilter) {
                 return $query->where('payment_state', $paymentStateFilter);
             })
-            ->orderBy('invoice_date', 'desc')
-            ->orderBy('created_at', 'desc')
+            ->when(!empty($yearFilter), function ($query) use ($yearFilter) {
+                return $query->whereYear('invoice_date', $yearFilter);
+            })
+            ->when(!empty($monthFilter), function ($query) use ($monthFilter) {
+                return $query->whereMonth('invoice_date', $monthFilter);
+            })
+            ->orderByRaw('YEAR(invoice_date) DESC')
+            ->orderByRaw('MONTH(invoice_date) DESC')
+            ->orderBy('invoice_date', 'asc') // Tanggal lama di bawah
+            ->orderBy('created_at', 'asc')
             ->paginate($perPage)
             ->withQueryString();
 
@@ -86,6 +96,15 @@ class AccountMoveController extends Controller
             ];
         });
 
+        // Get available years and months for filter
+        $availableYears = AccountMove::selectRaw('YEAR(invoice_date) as year')
+            ->vendorBills()
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year')
+            ->filter()
+            ->values();
+
         return Inertia::render('Purchase/VendorBill/Index', [
             'bills' => $bills,
             'filters' => [
@@ -93,7 +112,10 @@ class AccountMoveController extends Controller
                 'per_page' => (int) $perPage,
                 'state' => $stateFilter,
                 'payment_state' => $paymentStateFilter,
+                'year' => $yearFilter,
+                'month' => $monthFilter,
             ],
+            'availableYears' => $availableYears,
         ]);
     }
 

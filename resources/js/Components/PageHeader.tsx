@@ -45,13 +45,13 @@ export function PageHeader({
             )}
 
             {/* Title & Actions */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="space-y-1">
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            <div className="flex flex-col gap-3 md:gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="space-y-1 min-w-0 flex-1">
+                    <h1 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-foreground break-words">
                         {title}
                     </h1>
                     {description && (
-                        <p className="text-base text-muted-foreground">
+                        <p className="text-sm md:text-base text-muted-foreground break-words">
                             {description}
                         </p>
                     )}
@@ -59,7 +59,7 @@ export function PageHeader({
 
                 {/* Actions */}
                 {actions && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                         {actions}
                     </div>
                 )}
@@ -78,20 +78,20 @@ export function SimplePageHeader({
     className,
 }: Omit<PageHeaderProps, 'breadcrumbs'>) {
     return (
-        <div className={cn('flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between', className)}>
-            <div className="space-y-1">
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">
+        <div className={cn('flex flex-col gap-3 md:gap-4 sm:flex-row sm:items-center sm:justify-between', className)}>
+            <div className="space-y-1 min-w-0 flex-1">
+                <h1 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-foreground break-words">
                     {title}
                 </h1>
                 {description && (
-                    <p className="text-base text-muted-foreground">
+                    <p className="text-sm md:text-base text-muted-foreground break-words">
                         {description}
                     </p>
                 )}
             </div>
 
             {actions && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                     {actions}
                 </div>
             )}

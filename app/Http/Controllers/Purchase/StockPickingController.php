@@ -27,6 +27,8 @@ class StockPickingController extends Controller
         $perPage = $request->input('per_page', 10);
         $search = trim($request->input('search', ''));
         $stateFilter = trim($request->input('state', ''));
+        $yearFilter = trim($request->input('year', ''));
+        $monthFilter = trim($request->input('month', ''));
 
         $pickings = StockPicking::query()
             ->with([
@@ -45,8 +47,16 @@ class StockPickingController extends Controller
             ->when(!empty($stateFilter), function ($query) use ($stateFilter) {
                 return $query->where('state', $stateFilter);
             })
-            ->orderBy('scheduled_date', 'desc')
-            ->orderBy('created_at', 'desc')
+            ->when(!empty($yearFilter), function ($query) use ($yearFilter) {
+                return $query->whereYear('scheduled_date', $yearFilter);
+            })
+            ->when(!empty($monthFilter), function ($query) use ($monthFilter) {
+                return $query->whereMonth('scheduled_date', $monthFilter);
+            })
+            ->orderByRaw('YEAR(scheduled_date) DESC')
+            ->orderByRaw('MONTH(scheduled_date) DESC')
+            ->orderBy('scheduled_date', 'asc') // Tanggal lama di bawah
+            ->orderBy('created_at', 'asc')
             ->paginate($perPage)
             ->withQueryString();
 
@@ -71,13 +81,25 @@ class StockPickingController extends Controller
             ];
         });
 
+        // Get available years and months for filter
+        $availableYears = StockPicking::selectRaw('YEAR(scheduled_date) as year')
+            ->incoming()
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year')
+            ->filter()
+            ->values();
+
         return Inertia::render('Purchase/Receipt/Index', [
             'pickings' => $pickings,
             'filters' => [
                 'search' => $search,
                 'per_page' => (int) $perPage,
                 'state' => $stateFilter,
+                'year' => $yearFilter,
+                'month' => $monthFilter,
             ],
+            'availableYears' => $availableYears,
         ]);
     }
 

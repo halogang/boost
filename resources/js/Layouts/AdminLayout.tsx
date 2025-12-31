@@ -145,7 +145,7 @@ export default function AdminLayout({ children, title }: Props) {
 
         {/* Page Content */}
         <main className="flex-1 overflow-auto pb-20 md:pb-0 bg-gray-50 dark:bg-gray-900">
-          <div className="p-4 md:p-8">{children}</div>
+          <div className="p-3 md:p-4 lg:p-8 max-w-full overflow-x-hidden">{children}</div>
         </main>
       </div>
 

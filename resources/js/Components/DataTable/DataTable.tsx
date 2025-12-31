@@ -143,43 +143,50 @@ export function DataTable<T>({
   return (
     <div className="space-y-4">
       {/* Top Controls */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3 flex-1">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 flex-1 min-w-0">
           {showSearch && (
-            <DataTableSearch
-              value={searchValue}
-              onChange={handleSearchChange}
-              placeholder={searchPlaceholder}
-            />
+            <div className="w-full md:flex-1 md:max-w-sm">
+              <DataTableSearch
+                value={searchValue}
+                onChange={handleSearchChange}
+                placeholder={searchPlaceholder}
+              />
+            </div>
           )}
           {filters.length > 0 && (
-            <DataTableFilters
-              filters={filters}
-              values={filterValues}
-              onChange={handleFilterChange}
-            />
+            <div className="w-full md:w-auto overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+              <DataTableFilters
+                filters={filters}
+                values={filterValues}
+                onChange={handleFilterChange}
+              />
+            </div>
           )}
         </div>
         {showPerPage && pagination && (
-          <DataTablePerPage
-            value={pagination.per_page}
-            options={perPageOptions}
-            onChange={handlePerPageChange}
-          />
+          <div className="flex-shrink-0">
+            <DataTablePerPage
+              value={pagination.per_page}
+              options={perPageOptions}
+              onChange={handlePerPageChange}
+            />
+          </div>
         )}
       </div>
 
       {/* Table */}
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto -mx-3 md:mx-0">
+          <div className="inline-block min-w-full align-middle px-3 md:px-0">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white"
+                      className="px-3 md:px-6 py-2 md:py-3 text-left text-xs md:text-sm font-semibold text-gray-900 dark:text-white"
                     >
                       {header.isPlaceholder
                         ? null
@@ -228,7 +235,7 @@ export function DataTable<T>({
                 table.getRowModel().rows.map((row) => (
                   <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
                     {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-6 py-4 dark:text-gray-200">
+                      <td key={cell.id} className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm dark:text-gray-200">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -249,6 +256,7 @@ export function DataTable<T>({
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 

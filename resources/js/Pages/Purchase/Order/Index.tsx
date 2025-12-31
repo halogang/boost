@@ -16,10 +16,28 @@ interface Props {
     per_page?: number;
     type?: string;
     state?: string;
+    year?: string;
+    month?: string;
   };
+  availableYears?: number[];
 }
 
-export default function Index({ orders, filters }: Props) {
+const monthOptions = [
+  { value: '1', label: 'Januari' },
+  { value: '2', label: 'Februari' },
+  { value: '3', label: 'Maret' },
+  { value: '4', label: 'April' },
+  { value: '5', label: 'Mei' },
+  { value: '6', label: 'Juni' },
+  { value: '7', label: 'Juli' },
+  { value: '8', label: 'Agustus' },
+  { value: '9', label: 'September' },
+  { value: '10', label: 'Oktober' },
+  { value: '11', label: 'November' },
+  { value: '12', label: 'Desember' },
+];
+
+export default function Index({ orders, filters, availableYears = [] }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const { handleDelete } = useCrudActions({
     resourceName: 'RFQ/PO',
@@ -40,6 +58,8 @@ export default function Index({ orders, filters }: Props) {
         search: filters?.search || '',
         type: filters?.type || '',
         state: filters?.state || '',
+        year: filters?.year || '',
+        month: filters?.month || '',
       },
       {
         preserveState: true,
@@ -59,6 +79,8 @@ export default function Index({ orders, filters }: Props) {
         search: search || '',
         type: filters?.type || '',
         state: filters?.state || '',
+        year: filters?.year || '',
+        month: filters?.month || '',
       },
       {
         preserveState: true,
@@ -78,6 +100,8 @@ export default function Index({ orders, filters }: Props) {
         search: filters?.search || '',
         type: filterValues.type || '',
         state: filterValues.state || '',
+        year: filterValues.year || '',
+        month: filterValues.month || '',
       },
       {
         preserveState: true,
@@ -90,7 +114,7 @@ export default function Index({ orders, filters }: Props) {
   return (
     <AdminLayout title="RFQ & Purchase Order">
       <div className="space-y-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-3 md:p-4 lg:p-6">
           <PageHeader
             title="RFQ & Purchase Order"
             description="Kelola Request for Quotation (RFQ) dan Purchase Order (PO)"
@@ -145,6 +169,23 @@ export default function Index({ orders, filters }: Props) {
                 { value: 'purchase', label: 'PO Confirmed' },
                 { value: 'done', label: 'Done' },
               ],
+            },
+            {
+              key: 'year',
+              label: 'Tahun',
+              value: filters?.year || '',
+              placeholder: 'Semua Tahun',
+              options: availableYears.map((year) => ({
+                value: year.toString(),
+                label: year.toString(),
+              })),
+            },
+            {
+              key: 'month',
+              label: 'Bulan',
+              value: filters?.month || '',
+              placeholder: 'Semua Bulan',
+              options: monthOptions,
             },
           ]}
           searchPlaceholder="Cari berdasarkan nomor RFQ/PO atau vendor..."
