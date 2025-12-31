@@ -6,6 +6,7 @@ import { DataTable, DataTableServerResponse } from '@/Components/DataTable';
 import { createUserColumns, User } from './columns';
 import { Button } from '@/Components/Button';
 import { useCrudActions } from '@/hooks/useCrudActions';
+import { useConfirmationModal } from '@/Components/ConfirmationProvider';
 
 interface PaginatedResponse extends DataTableServerResponse<User> {}
 
@@ -26,6 +27,7 @@ interface Props {
 
 export default function Index({ users, roles, filters }: Props) {
   const [isLoading, setIsLoading] = useState(false);
+  const confirmationModal = useConfirmationModal();
   const { handleDelete } = useCrudActions({
     resourceName: 'User',
     baseRoute: '/users',
@@ -33,7 +35,9 @@ export default function Index({ users, roles, filters }: Props) {
 
   // Create columns with delete handler
   const userColumns = createUserColumns({
-    onDelete: (id, name) => handleDelete(id, name),
+    onDelete: (id, name) => handleDelete(id, name, {
+      confirmationModal,
+    }),
   });
 
   const handlePaginationChange = (pageIndex: number, pageSize: number) => {

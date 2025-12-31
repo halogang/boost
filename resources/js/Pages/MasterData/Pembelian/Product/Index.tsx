@@ -6,6 +6,7 @@ import { DataTable, DataTableServerResponse } from '@/Components/DataTable';
 import { createProductColumns, ProductProduct } from './columns';
 import { Button } from '@/Components/Button';
 import { useCrudActions } from '@/hooks/useCrudActions';
+import { useConfirmationModal } from '@/Components/ConfirmationProvider';
 
 interface PaginatedResponse extends DataTableServerResponse<ProductProduct> {}
 
@@ -24,6 +25,7 @@ interface Props {
 
 export default function Index({ products, categories, types, filters }: Props) {
   const [isLoading, setIsLoading] = useState(false);
+  const confirmationModal = useConfirmationModal();
   const { handleDelete } = useCrudActions({
     resourceName: 'Produk',
     baseRoute: '/products',
@@ -31,7 +33,9 @@ export default function Index({ products, categories, types, filters }: Props) {
 
   // Create columns with delete handler
   const productColumns = createProductColumns({
-    onDelete: (id, name) => handleDelete(id, name),
+    onDelete: (id, name) => handleDelete(id, name, {
+      confirmationModal,
+    }),
   });
 
   const handlePaginationChange = (pageIndex: number, pageSize: number) => {

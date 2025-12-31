@@ -32,6 +32,7 @@ export default function RolePermissionManagement({
   groupedPermissions,
 }: Props) {
   const { flash } = usePage().props as any;
+  const { error } = useToast();
   const [expandedRole, setExpandedRole] = useState<number | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
   const [rolePermissions, setRolePermissions] = useState<{
@@ -89,11 +90,11 @@ export default function RolePermissionManagement({
         });
       } else {
         console.error('Toggle failed:', data.message || 'Unknown error');
-        alert(data.message || 'Gagal mengubah permission. Silakan coba lagi.');
+        error(data.message || 'Gagal mengubah permission. Silakan coba lagi.');
       }
     } catch (error) {
       console.error('Error toggling permission:', error);
-      alert('Terjadi error saat mengubah permission. Silakan coba lagi.');
+      error('Terjadi error saat mengubah permission. Silakan coba lagi.');
     } finally {
       setLoading(null);
     }

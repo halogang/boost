@@ -104,31 +104,47 @@ export function useCrudActions(options: UseCrudActionsOptions) {
       onError?: (error: any) => void;
       confirmMessage?: string;
       successMessage?: string;
+      confirmationModal?: ReturnType<typeof import('@/Components/ConfirmationProvider').useConfirmationModal>;
     }
   ) => {
     const confirmMessage =
       customOptions?.confirmMessage ||
       `Apakah Anda yakin ingin menghapus ${itemName ? `"${itemName}"` : resourceName}?`;
     
-    if (!confirm(confirmMessage)) {
-      return;
-    }
+    const performDelete = () => {
+      router.delete(`${baseRoute}/${id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+          const message = customOptions?.successMessage || `${resourceName} berhasil dihapus`;
+          success('Berhasil', message);
+          customOptions?.onSuccess?.();
+          onSuccess?.('delete', { id });
+        },
+        onError: (errors) => {
+          const errorMessage = errors.message || `Gagal menghapus ${resourceName}`;
+          error('Gagal', errorMessage);
+          customOptions?.onError?.(errors);
+          onError?.('delete', errors);
+        },
+      });
+    };
 
-    router.delete(`${baseRoute}/${id}`, {
-      preserveScroll: true,
-      onSuccess: () => {
-        const message = customOptions?.successMessage || `${resourceName} berhasil dihapus`;
-        success('Berhasil', message);
-        customOptions?.onSuccess?.();
-        onSuccess?.('delete', { id });
-      },
-      onError: (errors) => {
-        const errorMessage = errors.message || `Gagal menghapus ${resourceName}`;
-        error('Gagal', errorMessage);
-        customOptions?.onError?.(errors);
-        onError?.('delete', errors);
-      },
-    });
+    // Use confirmation modal if provided, otherwise use browser confirm (fallback)
+    if (customOptions?.confirmationModal) {
+      customOptions.confirmationModal.confirm({
+        title: 'Hapus Data',
+        message: confirmMessage,
+        variant: 'danger',
+        confirmText: 'Ya, Hapus',
+        cancelText: 'Batal',
+        onConfirm: performDelete,
+      });
+    } else {
+      // Fallback to browser confirm for backward compatibility
+      if (window.confirm(confirmMessage)) {
+        performDelete();
+      }
+    }
   };
 
   /**

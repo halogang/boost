@@ -6,6 +6,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { initTheme } from './utils/theme';
 import { ToastProvider } from './Contexts/ToastContext';
+import { ConfirmationProvider } from './Components/ConfirmationProvider';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Ajib Darkah';
 
@@ -24,7 +25,9 @@ createInertiaApp({
 
         root.render(
             <ToastProvider>
-                <App {...props} />
+                <ConfirmationProvider>
+                    <App {...props} />
+                </ConfirmationProvider>
             </ToastProvider>
         );
     },

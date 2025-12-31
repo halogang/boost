@@ -44,11 +44,20 @@ export default function Index() {
   const [isLoading, setIsLoading] = useState(false);
   const [showToggleModal, setShowToggleModal] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
+  const { confirm } = useConfirmationModal();
 
   const handleDelete = (id: number) => {
-    if (!confirm('Hapus menu ini?')) return;
-    setIsLoading(true);
-    router.post(route('menus.destroy', id), { _method: 'DELETE' }, { onFinish: () => setIsLoading(false) });
+    confirm({
+      title: 'Hapus Menu',
+      message: 'Hapus menu ini?',
+      variant: 'danger',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      onConfirm: () => {
+        setIsLoading(true);
+        router.post(route('menus.destroy', id), { _method: 'DELETE' }, { onFinish: () => setIsLoading(false) });
+      },
+    });
   };
 
   const handleToggleActive = (menu: MenuItem) => {

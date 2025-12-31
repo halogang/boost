@@ -4,6 +4,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { PageHeader } from '@/Components/PageHeader';
 import { Button } from '@/Components/Button';
 import { useToast } from '@/hooks/useToast';
+import { useConfirmationModal } from '@/Components/ConfirmationProvider';
 import { formatQuantity } from '@/lib/utils';
 import { HintGuide } from '@/Components/HintGuide';
 
@@ -62,22 +63,28 @@ interface Props {
 
 export default function Show({ order }: Props) {
   const { success, error } = useToast();
+  const { confirm } = useConfirmationModal();
 
   // Normalize orderLines - Laravel sends snake_case, convert to camelCase
   const orderLines = order.orderLines || order.order_lines || [];
 
   const handleConfirm = () => {
-    if (!confirm('Apakah Anda yakin ingin mengonfirmasi RFQ ini menjadi PO?')) {
-      return;
-    }
-
-    router.post(`/purchase-orders/${order.id}/confirm`, {}, {
-      preserveScroll: true,
-      onSuccess: () => {
-        success('RFQ berhasil dikonfirmasi menjadi PO');
-      },
-      onError: () => {
-        error('Gagal mengonfirmasi RFQ');
+    confirm({
+      title: 'Konfirmasi RFQ menjadi PO',
+      message: 'Apakah Anda yakin ingin mengonfirmasi RFQ ini menjadi PO?',
+      variant: 'default',
+      confirmText: 'Ya, Konfirmasi',
+      cancelText: 'Batal',
+      onConfirm: () => {
+        router.post(`/purchase-orders/${order.id}/confirm`, {}, {
+          preserveScroll: true,
+          onSuccess: () => {
+            success('RFQ berhasil dikonfirmasi menjadi PO');
+          },
+          onError: () => {
+            error('Gagal mengonfirmasi RFQ');
+          },
+        });
       },
     });
   };

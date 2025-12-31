@@ -6,6 +6,7 @@ import { Button } from '@/Components/Button';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import { useToast } from '@/hooks/useToast';
+import { useConfirmationModal } from '@/Components/ConfirmationProvider';
 import { formatQuantity } from '@/lib/utils';
 import { HintGuide } from '@/Components/HintGuide';
 
@@ -70,6 +71,7 @@ interface Props {
 
 export default function Show({ bill }: Props) {
   const { success, error } = useToast();
+  const { confirm } = useConfirmationModal();
 
   // Normalize moveLines - Laravel sends snake_case, convert to camelCase
   const moveLines = bill.moveLines || bill.move_lines || [];
@@ -84,17 +86,22 @@ export default function Show({ bill }: Props) {
   });
 
   const handlePost = () => {
-    if (!confirm('Apakah Anda yakin ingin mem-post vendor bill ini?')) {
-      return;
-    }
-
-    router.post(`/vendor-bills/${bill.id}/post`, {}, {
-      preserveScroll: true,
-      onSuccess: () => {
-        success('Vendor Bill berhasil di-post');
-      },
-      onError: () => {
-        error('Gagal mem-post Vendor Bill');
+    confirm({
+      title: 'Post Vendor Bill',
+      message: 'Apakah Anda yakin ingin mem-post vendor bill ini?',
+      variant: 'default',
+      confirmText: 'Ya, Post',
+      cancelText: 'Batal',
+      onConfirm: () => {
+        router.post(`/vendor-bills/${bill.id}/post`, {}, {
+          preserveScroll: true,
+          onSuccess: () => {
+            success('Vendor Bill berhasil di-post');
+          },
+          onError: () => {
+            error('Gagal mem-post Vendor Bill');
+          },
+        });
       },
     });
   };

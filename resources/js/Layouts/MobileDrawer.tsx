@@ -2,6 +2,36 @@ import React, { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { cn } from '@/lib/utils';
+import { useConfirmationModal } from '@/Components/ConfirmationProvider';
+
+function LogoutButton() {
+  const { confirm } = useConfirmationModal();
+
+  const handleLogout = () => {
+    confirm({
+      title: 'Keluar',
+      message: 'Apakah Anda yakin ingin keluar?',
+      variant: 'default',
+      confirmText: 'Ya, Keluar',
+      cancelText: 'Batal',
+      onConfirm: () => {
+        window.location.href = '/logout';
+      },
+    });
+  };
+
+  return (
+    <button
+      onClick={handleLogout}
+      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-red-400 transition-colors duration-200"
+    >
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+      </svg>
+      <span className="text-sm font-medium">Keluar</span>
+    </button>
+  );
+}
 
 interface MenuItem {
   id: number;
@@ -254,19 +284,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
 
         {/* Logout */}
         <div className="p-3 border-t border-gray-800">
-          <button
-            onClick={() => {
-              if (confirm('Apakah Anda yakin ingin keluar?')) {
-                window.location.href = '/logout';
-              }
-            }}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-red-400 transition-colors duration-200"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span className="text-sm font-medium">Keluar</span>
-          </button>
+          <LogoutButton />
         </div>
       </div>
     </>

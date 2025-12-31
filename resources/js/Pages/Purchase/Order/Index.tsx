@@ -6,6 +6,7 @@ import { DataTable, DataTableServerResponse } from '@/Components/DataTable';
 import { createPurchaseOrderColumns, PurchaseOrder } from './columns';
 import { Button } from '@/Components/Button';
 import { useCrudActions } from '@/hooks/useCrudActions';
+import { useConfirmationModal } from '@/Components/ConfirmationProvider';
 import { HintGuide } from '@/Components/HintGuide';
 
 interface PaginatedResponse extends DataTableServerResponse<PurchaseOrder> {}
@@ -40,13 +41,16 @@ const monthOptions = [
 
 export default function Index({ orders, filters, availableYears = [] }: Props) {
   const [isLoading, setIsLoading] = useState(false);
+  const confirmationModal = useConfirmationModal();
   const { handleDelete } = useCrudActions({
     resourceName: 'RFQ/PO',
     baseRoute: '/purchase-orders',
   });
 
   const orderColumns = createPurchaseOrderColumns({
-    onDelete: (id, name) => handleDelete(id, name),
+    onDelete: (id, name) => handleDelete(id, name, {
+      confirmationModal,
+    }),
   });
 
   const handlePaginationChange = (pageIndex: number, pageSize: number) => {
