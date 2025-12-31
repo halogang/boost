@@ -23,7 +23,7 @@ function LogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-red-400 transition-colors duration-200"
+      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200"
     >
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -52,7 +52,22 @@ interface MobileDrawerProps {
 }
 
 export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerProps) {
-  const { url } = usePage();
+  const { url, props } = usePage<any>();
+  const primaryColor = props.settings?.primary_color || '#2563eb';
+  
+  // Helper function to check if color is light (for text contrast)
+  const isLightColor = (hex: string): boolean => {
+    const rgb = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+    if (!rgb) return false;
+    const r = parseInt(rgb[1], 16);
+    const g = parseInt(rgb[2], 16);
+    const b = parseInt(rgb[3], 16);
+    // Calculate relative luminance
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5;
+  };
+  
+  const textColor = isLightColor(primaryColor) ? '#000000' : '#ffffff';
   
   const [expandedMenus, setExpandedMenus] = useState<number[]>(() => {
     if (typeof window !== 'undefined') {
@@ -147,18 +162,22 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
             onClick={() => !isDisabled && toggleSubmenu(menu.id)}
             disabled={isDisabled}
             className={cn(
-              'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-200',
-              isDisabled && 'opacity-50 cursor-not-allowed text-gray-500',
-              (hasActive || isExpanded) && !isDisabled && 'bg-blue-600 text-white',
-              !isDisabled && !hasActive && 'text-gray-300 hover:bg-gray-800'
+              'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200',
+              isDisabled && 'opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-500',
+              !isDisabled && !hasActive && 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-primary-400'
             )}
+            style={(hasActive || isExpanded) && !isDisabled ? {
+              backgroundColor: primaryColor,
+              color: textColor,
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+            } : undefined}
           >
             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIconSvg(menu.icon || 'home')} />
             </svg>
             <span className="flex-1 text-sm font-medium text-left">{menu.name}</span>
             {!menu.active && (
-              <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded font-medium">
+              <span className="text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-2 py-0.5 rounded font-medium">
                 Segera
               </span>
             )}
@@ -178,7 +197,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
           </button>
 
           {isExpanded && (
-            <div className="mt-1 ml-4 pl-3 border-l border-gray-700 space-y-1">
+            <div className="mt-1 ml-4 pl-3 border-l-2 border-primary-200 dark:border-primary-800 space-y-1">
               {menu.children?.map((child) => renderMenuItem(child, level + 1))}
             </div>
           )}
@@ -193,10 +212,14 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
           href={route(menu.route)}
           onClick={handleLinkClick}
           className={cn(
-            'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-200',
-            active && 'bg-blue-600 text-white',
-            !active && 'text-gray-300 hover:bg-gray-800'
+            'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200',
+            !active && 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-primary-400'
           )}
+          style={active ? {
+            backgroundColor: primaryColor,
+            color: textColor,
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+          } : undefined}
         >
           <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIconSvg(menu.icon || 'home')} />
@@ -210,13 +233,13 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
       return (
         <div
           key={menu.id}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg opacity-50 cursor-not-allowed text-gray-500"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-500"
         >
           <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIconSvg(menu.icon || 'home')} />
           </svg>
           <span className="flex-1 text-sm font-medium">{menu.name}</span>
-          <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded font-medium">
+          <span className="text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-2 py-0.5 rounded font-medium">
             Segera
           </span>
         </div>
@@ -239,27 +262,29 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
       {/* Drawer */}
       <div
         className={cn(
-          'fixed top-0 left-0 h-full w-72 bg-gray-900 border-r border-gray-800 text-white z-50 transform transition-transform duration-300 ease-in-out md:hidden',
+          'fixed top-0 left-0 h-full w-72 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shadow-xl z-50 transform transition-transform duration-300 ease-in-out md:hidden',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         {/* Header */}
-        <div className="p-5 border-b border-gray-800 flex items-center justify-between">
+        <div className="p-5 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-br from-primary-50 to-white dark:from-gray-900 dark:to-gray-900 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img
-              src="/AJIB-DARKAH-INDONESIA.png"
-              alt="Ajib Darkah Indonesia"
-              className="w-10 h-10 object-contain"
-            />
+            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center shadow-md">
+              <img
+                src="/AJIB-DARKAH-INDONESIA.png"
+                alt="Ajib Darkah Indonesia"
+                className="w-10 h-10 object-contain"
+              />
+            </div>
             <div>
-              <h2 className="font-semibold text-base">Ajib Darkah</h2>
-              <p className="text-xs text-gray-400">Delivery System</p>
+              <h2 className="font-bold text-base text-gray-900 dark:text-white">Ajib Darkah</h2>
+              <p className="text-xs text-gray-600 dark:text-gray-400">Delivery System</p>
             </div>
           </div>
           
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors duration-200"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200 text-gray-600 dark:text-gray-300"
           >
             <svg
               className="w-5 h-5"
@@ -283,7 +308,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
         </nav>
 
         {/* Logout */}
-        <div className="p-3 border-t border-gray-800">
+        <div className="p-3 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
           <LogoutButton />
         </div>
       </div>
