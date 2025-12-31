@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageHeader } from '@/Components/PageHeader';
@@ -115,24 +115,6 @@ const createReceiptColumns = (): ColumnDef<StockPicking>[] => [
 
 export default function Index({ pickings, filters }: Props) {
   const [isLoading, setIsLoading] = useState(false);
-
-  // Debug: Log data yang diterima dari backend
-  React.useEffect(() => {
-    console.log('=== RECEIPT DATA DEBUG ===');
-    console.log('Total pickings:', pickings.data?.length);
-    console.log('Pickings data:', pickings.data);
-    if (pickings.data && pickings.data.length > 0) {
-      pickings.data.forEach((picking, index) => {
-        console.log(`\n--- Picking ${index + 1} (ID: ${picking.id}) ---`);
-        console.log('Name:', picking.name);
-        console.log('purchase_id (from data):', (picking as any).purchase_id);
-        console.log('purchaseOrder:', picking.purchaseOrder);
-        console.log('purchaseOrder?.name:', picking.purchaseOrder?.name);
-        console.log('purchaseOrder?.partner:', picking.purchaseOrder?.partner);
-      });
-    }
-    console.log('=== END DEBUG ===');
-  }, [pickings]);
 
   const receiptColumns = createReceiptColumns();
 

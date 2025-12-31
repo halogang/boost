@@ -54,10 +54,11 @@ class AccountMove extends Model
 
     /**
      * Relationship: Purchase Order
+     * PENTING: Tambahkan withTrashed() karena PO mungkin soft deleted
      */
     public function purchaseOrder()
     {
-        return $this->belongsTo(PurchaseOrder::class, 'purchase_id');
+        return $this->belongsTo(PurchaseOrder::class, 'purchase_id')->withTrashed();
     }
 
     /**

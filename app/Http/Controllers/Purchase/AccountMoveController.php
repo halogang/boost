@@ -32,7 +32,13 @@ class AccountMoveController extends Controller
 
         $bills = AccountMove::query()
             ->vendorBills()
-            ->with(['partner', 'purchaseOrder', 'user'])
+            ->with([
+                'partner',
+                'purchaseOrder' => function ($query) {
+                    $query->withTrashed();
+                },
+                'user'
+            ])
             ->when(!empty($search), function ($query) use ($search) {
                 return $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -52,6 +58,33 @@ class AccountMoveController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate($perPage)
             ->withQueryString();
+
+        // FORCE EXPLICIT SERIALIZATION
+        $bills->through(function ($bill) {
+            return [
+                'id' => $bill->id,
+                'name' => $bill->name,
+                'ref' => $bill->ref,
+                'purchase_id' => $bill->purchase_id,
+                'state' => $bill->state,
+                'payment_state' => $bill->payment_state,
+                'invoice_date' => $bill->invoice_date?->format('Y-m-d'),
+                'invoice_date_due' => $bill->invoice_date_due?->format('Y-m-d'),
+                'amount_untaxed' => $bill->amount_untaxed,
+                'amount_tax' => $bill->amount_tax,
+                'amount_total' => $bill->amount_total,
+                'amount_residual' => $bill->amount_residual,
+                'created_at' => $bill->created_at?->format('Y-m-d H:i:s'),
+                'partner' => $bill->partner ? [
+                    'id' => $bill->partner->id,
+                    'name' => $bill->partner->name,
+                ] : null,
+                'purchaseOrder' => $bill->purchaseOrder ? [
+                    'id' => $bill->purchaseOrder->id,
+                    'name' => $bill->purchaseOrder->name,
+                ] : null,
+            ];
+        });
 
         return Inertia::render('Purchase/VendorBill/Index', [
             'bills' => $bills,
