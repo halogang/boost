@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageHeader } from '@/Components/PageHeader';
@@ -53,22 +53,24 @@ const createReceiptColumns = (): ColumnDef<StockPicking>[] => [
   {
     accessorKey: 'purchaseOrder.name',
     header: 'Purchase Order',
-    cell: ({ row }) => (
-      <div>
-        {row.original.purchaseOrder ? (
-          <>
-            <div className="font-medium text-gray-900 dark:text-white">
-              {row.original.purchaseOrder.name}
-            </div>
+    cell: ({ row }) => {
+      const purchaseOrder = row.original.purchaseOrder;
+      if (!purchaseOrder || !purchaseOrder.name) {
+        return <span className="text-gray-400">-</span>;
+      }
+      return (
+        <div>
+          <div className="font-medium text-gray-900 dark:text-white">
+            {purchaseOrder.name}
+          </div>
+          {purchaseOrder.partner && (
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              {row.original.purchaseOrder.partner.name}
+              {purchaseOrder.partner.name}
             </div>
-          </>
-        ) : (
-          <span className="text-gray-400">-</span>
-        )}
-      </div>
-    ),
+          )}
+        </div>
+      );
+    },
   },
   {
     accessorKey: 'state',
@@ -113,6 +115,24 @@ const createReceiptColumns = (): ColumnDef<StockPicking>[] => [
 
 export default function Index({ pickings, filters }: Props) {
   const [isLoading, setIsLoading] = useState(false);
+
+  // Debug: Log data yang diterima dari backend
+  React.useEffect(() => {
+    console.log('=== RECEIPT DATA DEBUG ===');
+    console.log('Total pickings:', pickings.data?.length);
+    console.log('Pickings data:', pickings.data);
+    if (pickings.data && pickings.data.length > 0) {
+      pickings.data.forEach((picking, index) => {
+        console.log(`\n--- Picking ${index + 1} (ID: ${picking.id}) ---`);
+        console.log('Name:', picking.name);
+        console.log('purchase_id (from data):', (picking as any).purchase_id);
+        console.log('purchaseOrder:', picking.purchaseOrder);
+        console.log('purchaseOrder?.name:', picking.purchaseOrder?.name);
+        console.log('purchaseOrder?.partner:', picking.purchaseOrder?.partner);
+      });
+    }
+    console.log('=== END DEBUG ===');
+  }, [pickings]);
 
   const receiptColumns = createReceiptColumns();
 

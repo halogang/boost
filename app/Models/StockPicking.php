@@ -31,10 +31,11 @@ class StockPicking extends Model
 
     /**
      * Relationship: Purchase Order
+     * PENTING: Tambahkan withTrashed() karena PO mungkin soft deleted
      */
     public function purchaseOrder()
     {
-        return $this->belongsTo(PurchaseOrder::class, 'purchase_id');
+        return $this->belongsTo(PurchaseOrder::class, 'purchase_id')->withTrashed();
     }
 
     /**
@@ -81,7 +82,7 @@ class StockPicking extends Model
 
         // Update purchase order receipt status
         if ($this->purchase_id) {
-            $po = PurchaseOrder::find($this->purchase_id);
+            $po = PurchaseOrder::withTrashed()->find($this->purchase_id);
             if ($po) {
                 // Check if all lines are received
                 $allReceived = $po->orderLines()
@@ -96,4 +97,3 @@ class StockPicking extends Model
         }
     }
 }
-

@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Purchase;
 use App\Models\StockPicking;
 use App\Models\StockMove;
 use App\Models\PurchaseOrder;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class StockPickingController extends Controller
@@ -27,7 +29,10 @@ class StockPickingController extends Controller
         $stateFilter = trim($request->input('state', ''));
 
         $pickings = StockPicking::query()
-            ->with(['purchaseOrder.partner', 'user'])
+            ->with([
+                'purchaseOrder.partner',
+                'user'
+            ])
             ->incoming()
             ->when(!empty($search), function ($query) use ($search) {
                 return $query->where(function ($q) use ($search) {
@@ -35,7 +40,7 @@ class StockPickingController extends Controller
                       ->orWhereHas('purchaseOrder', function ($poQuery) use ($search) {
                           $poQuery->where('name', 'like', "%{$search}%");
                       });
-                });
+            });
             })
             ->when(!empty($stateFilter), function ($query) use ($stateFilter) {
                 return $query->where('state', $stateFilter);
@@ -44,6 +49,27 @@ class StockPickingController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate($perPage)
             ->withQueryString();
+
+        // FORCE EXPLICIT SERIALIZATION
+        $pickings->through(function ($picking) {
+            return [
+                'id' => $picking->id,
+                'name' => $picking->name,
+                'purchase_id' => $picking->purchase_id,
+                'state' => $picking->state,
+                'scheduled_date' => $picking->scheduled_date?->format('Y-m-d'),
+                'date_done' => $picking->date_done?->format('Y-m-d H:i:s'),
+                'created_at' => $picking->created_at?->format('Y-m-d H:i:s'),
+                'purchaseOrder' => $picking->purchaseOrder ? [
+                    'id' => $picking->purchaseOrder->id,
+                    'name' => $picking->purchaseOrder->name,
+                    'partner' => $picking->purchaseOrder->partner ? [
+                        'id' => $picking->purchaseOrder->partner->id,
+                        'name' => $picking->purchaseOrder->partner->name,
+                    ] : null,
+                ] : null,
+            ];
+        });
 
         return Inertia::render('Purchase/Receipt/Index', [
             'pickings' => $pickings,
@@ -136,4 +162,3 @@ class StockPickingController extends Controller
         return $pdf->download($filename);
     }
 }
-

@@ -350,6 +350,9 @@ class PurchaseOrderController extends Controller
                     ->exists() ? 'to receive' : 'no',
             ]);
 
+            // Reload purchase order with orderLines to ensure we have fresh data
+            $purchaseOrder->load(['orderLines.product']);
+            
             // Create stock picking if has products that can be received
             // Both 'product' (storable) and 'consu' (consumable) can be received
             $hasReceivableProducts = $purchaseOrder->orderLines()
@@ -369,7 +372,7 @@ class PurchaseOrderController extends Controller
 
                 $picking = StockPicking::create([
                     'name' => $pickingNumber,
-                    'purchase_id' => $purchaseOrder->id,
+                    'purchase_id' => $purchaseOrder->id, // Ensure purchase_id is set
                     'picking_type_code' => 'incoming',
                     'location_dest_id' => 'WH/Stock', // Default warehouse location
                     'state' => 'confirmed',
@@ -377,8 +380,16 @@ class PurchaseOrderController extends Controller
                     'user_id' => Auth::id(),
                 ]);
 
+                // Reload picking to ensure purchase_id is saved
+                $picking->refresh();
+
                 // Create stock moves for each receivable product line (both product and consu)
                 foreach ($purchaseOrder->orderLines as $line) {
+                    // Ensure product is loaded
+                    if (!$line->relationLoaded('product')) {
+                        $line->load('product');
+                    }
+                    
                     // Both 'product' (storable) and 'consu' (consumable) can be received
                     if (in_array($line->product->type, ['product', 'consu'])) {
                         StockMove::create([
