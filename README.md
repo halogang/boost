@@ -1,256 +1,140 @@
-# ERP AJIB - Aqua Galon Delivery System
+﻿# Laravel + Inertia.js (React) Boilerplate
 
-Sistem ERP (Enterprise Resource Planning) untuk manajemen dan pengiriman aqua galon dengan fitur role-based permission, menu dinamis, dan dashboard admin.
+A clean, scalable, and highly structured boilerplate for building modern web applications using Laravel 11, React 18, Inertia.js, and Tailwind CSS. This boilerplate enforces strict architectural patterns to ensure maintainability as your project grows.
 
-## ✨ Fitur Utama
+## ✨ Features
 
-- 🔐 **Role-Based Access Control (RBAC)** - Sistem permission berbasis Spatie Permission
-- 📊 **Admin Dashboard** - Dashboard dengan menu yang dapat dikustomisasi
-- 👥 **User Management** - CRUD pengguna dengan role assignment
-- 🎯 **Permission Matrix** - Manajemen permission per role
-- 📱 **Dynamic Sidebar Menu** - Menu dapat diatur di database
-- 🔄 **Menu Hierarchical** - Support submenus
-- 🎨 **Modern UI** - React + TypeScript + Tailwind CSS
-- ⚡ **Server-Side Rendering** - Inertia.js
+- 🔐 **Authentication & Authorization** - Built-in login, registration, and role-based access control (RBAC) using Spatie Permission.
+- 🛡️ **Strict Architecture** - Enforces the `Model → Controller → Service` pattern. Thin controllers, thick services.
+- 🔑 **Centralized Permissions** - All permissions are strictly managed via `App\Constants\Permissions` to prevent hardcoding.
+- 📱 **Dynamic Sidebar Menu** - Database-driven hierarchical menus with automatic permission filtering.
+- ⚙️ **System Settings** - Global application settings management.
+- 🎨 **Modern UI Components** - Pre-configured with shadcn/ui, Tailwind CSS, and Lucide icons.
+- 📊 **Reusable DataTables** - Built-in server-side pagination, sorting, and filtering components.
+- 🔔 **Toast Notifications** - Integrated toast system for both frontend actions and Laravel flash messages.
 
 ## 🛠 Tech Stack
 
-**Backend:** Laravel 11, Spatie Permission, MySQL  
-**Frontend:** React 18, TypeScript, Tailwind CSS, Vite
+- **Backend:** Laravel 11, PHP 8.2+, MySQL/PostgreSQL
+- **Frontend:** React 18, TypeScript, Inertia.js, Tailwind CSS, shadcn/ui
+- **Tooling:** Vite, Pest (Testing), ESLint
 
-## 📦 Instalasi
+## 📦 Installation
 
 ### Prerequisites
-- PHP 8.2+
+- PHP 8.2 or higher
 - Composer
-- Node.js 18+
-- MySQL 8.0+
+- Node.js 18 or higher
+- MySQL or PostgreSQL
 
-### Setup (6 Langkah)
+### Setup Instructions
 
-**1. Clone & Install Dependencies**
+**1. Clone the repository**
 ```bash
-git clone https://github.com/halogang/erp-ajib.git
-cd erp-ajib
+git clone <your-repo-url> <project-name>
+cd <project-name>
+```
+
+**2. Install Dependencies**
+```bash
 composer install
 npm install
 ```
 
-**2. Environment Setup**
+**3. Environment Setup**
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
-
-Edit file `.env`:
+Update your `.env` file with your database credentials:
 ```env
-DB_DATABASE=aqua_galon
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=your_database_name
 DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-**3. Setup Database**
+**4. Run Migrations & Seeders**
 ```bash
 php artisan migrate:fresh --seed
 ```
+*Note: The default seeder will populate essential roles, permissions, menus, and an admin user.*
 
-**4. Jalankan Server**
+**5. Start the Development Servers**
 
-Terminal 1:
+In terminal 1 (Laravel):
 ```bash
 php artisan serve
 ```
 
-Terminal 2:
+In terminal 2 (Vite):
 ```bash
 npm run dev
 ```
 
-**5. Akses Aplikasi**
-```
-http://localhost:8000
-```
+**6. Access the Application**
+Open `http://localhost:8000` in your browser.
 
-**6. Login Credentials**
+**Default Admin Credentials:**
+- **Email:** admin@example.com
+- **Password:** password
 
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@example.com | admin123 |
-| Staff | staff@example.com | staff123 |
+## 🏗️ Architecture & Standards
 
-## 📁 Struktur Project
+This boilerplate strictly follows the **Model → Controller → Service** pattern. 
+
+### Core Rules:
+1. **Controllers MUST be thin:** Only handle HTTP requests, validation (via FormRequests), and return Inertia responses. **NO business logic.**
+2. **Services handle business logic:** All database operations, complex calculations, and data transformations belong in `app/Services`.
+3. **Centralized Permissions:** Never hardcode permission strings. Always use the constants defined in `app/Constants/Permissions.php`.
+4. **Policies for Authorization:** Use Laravel Policies (which utilize the Permission constants) to authorize actions.
+
+For complete coding standards and AI instructions, please read:
+👉 [`.github/copilot-instructions.md`](.github/copilot-instructions.md)
+
+## 📁 Key Directory Structure
 
 ```
 app/
-├── Http/Controllers/
-│   ├── AdminController.php           # Dashboard
-│   ├── MenuController.php            # Menu CRUD
-│   ├── PermissionController.php      # Permission matrix
-│   └── UserController.php            # User CRUD
-├── Models/
-│   ├── User.php                      # HasRoles trait
-│   └── Menu.php                      # Parent-child relations
+├── Constants/
+│   └── Permissions.php           # Centralized permission strings
+├── Http/
+│   ├── Controllers/              # Thin HTTP layer
+│   └── Requests/                 # Form validation rules
+├── Models/                       # Eloquent models (relationships & scopes only)
+├── Policies/                     # Authorization logic
+└── Services/                     # Business logic layer
 
 database/seeders/
-├── RolePermissionSeeder.php          # Roles & permissions
-├── MenuSeeder.php                    # Default menus
-└── DatabaseSeeder.php
+├── Core/                         # Essential app data (Roles, Menus, Users)
+├── MenuAccess/                   # Module-specific menu seeders
+└── Fix/                          # Idempotent data update seeders
 
 resources/js/
-├── Layouts/
-│   ├── AdminLayout.tsx               # Main wrapper
-│   └── Sidebar.tsx                   # Dynamic sidebar
-└── Pages/Admin/
-    ├── Dashboard.tsx
-    ├── Users/Index.tsx
-    └── Permissions/Index.tsx
+├── Components/                   # Reusable UI components (DataTable, Toast, etc.)
+├── hooks/                        # Custom React hooks
+├── lib/                          # Utility functions
+└── Pages/                        # Inertia page components
 ```
 
-## 🔌 API Endpoints
+## 📝 Development Workflow
 
-### Public API
-```
-GET /api/menus                        # Get all menus
-GET /api/permissions/matrix           # Get permission matrix
-POST /api/permissions/toggle          # Toggle permission
-```
+### Adding a New Feature (Example: "Articles")
+1. **Model & Migration:** Create `Article` model and migration.
+2. **Permissions:** Add `CREATE_ARTICLES`, `READ_ARTICLES`, etc., to `app/Constants/Permissions.php`.
+3. **Seeder:** Create `database/seeders/MenuAccess/Article/ArticleMenuPermissionSeeder.php` to register the menu and permissions.
+4. **Policy:** Create `ArticlePolicy` using the new constants.
+5. **Service:** Create `ArticleService` for business logic (create, update, delete).
+6. **Requests:** Create `StoreArticleRequest` and `UpdateArticleRequest`.
+7. **Controller:** Create `ArticleController` to handle HTTP and call `ArticleService`.
+8. **Frontend:** Create React pages in `resources/js/Pages/Articles/`.
 
-### Admin Routes (`/admin` prefix)
-```
-GET    /dashboard
-GET    /users                         # List users
-POST   /users                         # Create user
-PATCH  /users/{id}                    # Update user
-DELETE /users/{id}                    # Delete user
-GET    /permissions                   # Permission matrix
-POST   /permissions/roles/{role}      # Update role permissions
-GET    /menus                         # List menus
-POST   /menus                         # Create menu
-PATCH  /menus/{id}                    # Update menu
-DELETE /menus/{id}                    # Delete menu
-```
+## 🤖 AI-Generated Documentation
 
-## 🔐 Sistem Permission
-
-### Format CRUD
-Setiap resource memiliki 4 permissions: `create`, `read`, `update`, `delete`
-
-### Resources (24 permissions total)
-1. **Users** - Manajemen pengguna
-2. **Products** - Manajemen produk
-3. **Master Data** - Data master sistem
-4. **Attendance** - Kehadiran karyawan
-5. **Permissions** - Manajemen permission
-6. **Settings** - Pengaturan sistem
-
-### Default Roles
-- **Admin** - Full access (semua permissions)
-- **Staff** - Limited access (products + attendance: read, create, update)
-
-## 🎯 Fitur Utama
-
-### Dynamic Menu
-- Menu disimpan di database
-- Support nested/hierarchical menus
-- Auto-filter berdasarkan permission user
-- Real-time fetch via API
-
-### Permission Matrix
-- UI matrix interaktif dengan checkbox
-- Real-time toggle permission
-- Grouped by resource
-- AJAX auto-save
-
-### Admin Dashboard
-- Menu cards untuk quick access
-- Responsive grid layout
-- Permission-based visibility
-
-## 📝 Development Guide
-
-### Menambah Menu Baru
-1. Edit `database/seeders/MenuSeeder.php`
-2. Tambahkan menu baru
-3. Jalankan seeder:
-```bash
-php artisan db:seed --class=MenuSeeder
-```
-
-### Menambah Permission Baru
-1. Edit `database/seeders/RolePermissionSeeder.php`
-2. Tambahkan permission baru
-3. Assign ke role yang sesuai
-4. Re-run seeder:
-```bash
-php artisan migrate:fresh --seed
-```
-
-## 🐛 Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| Menu tidak muncul | Check permission di database, clear cache |
-| Role badge kosong | Verify user memiliki role, clear cache |
-| Permission toggle error | Check browser console untuk error CSRF |
-| UI tidak update | Clear browser cache, rebuild assets |
-
-**Clear Cache:**
-```bash
-php artisan cache:clear
-php artisan config:clear
-php artisan view:clear
-```
-
-## 📚 Command Reference
-
-### Development
-```bash
-php artisan serve                     # Start Laravel server
-npm run dev                           # Start Vite dev server
-npm run build                         # Build for production
-```
-
-### Database
-```bash
-php artisan migrate                   # Run migrations
-php artisan migrate:fresh --seed      # Fresh migration + seeding
-php artisan db:seed                   # Run all seeders
-php artisan db:seed --class=MenuSeeder # Run specific seeder
-```
-
-### Cache Management
-```bash
-php artisan cache:clear               # Clear application cache
-php artisan config:clear              # Clear config cache
-php artisan route:clear               # Clear route cache
-php artisan view:clear                # Clear view cache
-```
-
-## 📤 Deploy ke GitHub
-
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/halogang/erp-ajib.git
-git push -u origin main
-```
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
+All AI-generated documentation and guides are stored in the `ai-generated/` directory. These files use sequential numbering (e.g., `01-architecture.md`) for easy reading.
 
 ## 📄 License
 
-This project is [MIT](LICENSE) licensed.
-
-## 👨‍💻 Author
-
-**Halogang**  
-GitHub: [@halogang](https://github.com/halogang)
-
----
-
-**Version:** 1.0.0  
-**Last Updated:** December 2025
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
