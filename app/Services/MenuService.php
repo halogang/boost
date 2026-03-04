@@ -3,9 +3,12 @@
 namespace App\Services;
 
 use App\Models\Menu;
+use App\Models\MenuPosition;
 use App\Models\MenuRolePosition;
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class MenuService
 {
@@ -198,5 +201,206 @@ class MenuService
                 'children' => $this->buildMenuTree($menu->children ?? collect()),
             ];
         })->toArray();
+    }
+
+    // =========================================================================
+    // ADMIN CRUD
+    // =========================================================================
+
+    /**
+     * Get all menus (flat list) for admin DataTable.
+     */
+    public function getAllMenusForAdmin(): Collection
+    {
+        return Menu::with(['parent', 'positions', 'roles'])
+            ->orderBy('parent_id')
+            ->orderBy('order')
+            ->get();
+    }
+
+    /**
+     * Get data needed to render the Create form.
+     */
+    public function getCreateFormData(): array
+    {
+        return [
+            'parents' => Menu::whereNull('parent_id')->get(['id', 'name']),
+            'roles'   => Role::orderBy('name')->get(['id', 'name']),
+        ];
+    }
+
+    /**
+     * Get data needed to render the Edit form.
+     */
+    public function getEditFormData(Menu $menu): array
+    {
+        $menu->load(['positions', 'roles']);
+
+        $positions = [
+            'desktop_sidebar' => $menu->positions->where('device', 'desktop')->where('position', 'sidebar')->isNotEmpty(),
+            'mobile_drawer'   => $menu->positions->where('device', 'mobile')->where('position', 'drawer')->isNotEmpty(),
+            'mobile_bottom'   => $menu->positions->where('device', 'mobile')->where('position', 'bottom')->isNotEmpty(),
+        ];
+
+        return [
+            'menu'          => $menu,
+            'parents'       => Menu::where('id', '!=', $menu->id)->whereNull('parent_id')->get(['id', 'name']),
+            'roles'         => Role::orderBy('name')->get(['id', 'name']),
+            'positions'     => $positions,
+            'selectedRoles' => $menu->roles->pluck('id')->toArray(),
+        ];
+    }
+
+    /**
+     * Create a new menu with roles and positions.
+     */
+    public function createMenu(array $data): Menu
+    {
+        return DB::transaction(function () use ($data) {
+            $menu = Menu::create([
+                'name'       => $data['name'],
+                'icon'       => $data['icon'] ?? null,
+                'route'      => $data['route'] ?? null,
+                'permission' => $data['permission'] ?? null,
+                'parent_id'  => $data['parent_id'] ?? null,
+                'order'      => $data['order'] ?? 0,
+                'active'     => $data['active'] ?? true,
+            ]);
+
+            if (!empty($data['roles'])) {
+                $menu->roles()->sync($data['roles']);
+            }
+
+            $this->syncMenuPositions($menu, $data['positions'] ?? []);
+
+            return $menu;
+        });
+    }
+
+    /**
+     * Update an existing menu.
+     */
+    public function updateMenu(Menu $menu, array $data): Menu
+    {
+        return DB::transaction(function () use ($menu, $data) {
+            $menu->update([
+                'name'       => $data['name'],
+                'icon'       => $data['icon'] ?? null,
+                'route'      => $data['route'] ?? null,
+                'permission' => $data['permission'] ?? null,
+                'parent_id'  => $data['parent_id'] ?? null,
+                'order'      => $data['order'] ?? 0,
+                'active'     => $data['active'] ?? true,
+            ]);
+
+            $menu->roles()->sync($data['roles'] ?? []);
+            $this->syncMenuPositions($menu, $data['positions'] ?? []);
+
+            return $menu;
+        });
+    }
+
+    /**
+     * Delete a menu.
+     */
+    public function deleteMenu(Menu $menu): void
+    {
+        $menu->delete();
+    }
+
+    /**
+     * Toggle the active status of a menu.
+     */
+    public function toggleActive(Menu $menu): Menu
+    {
+        $menu->update(['active' => !$menu->active]);
+        return $menu;
+    }
+
+    /**
+     * Get menus for the sidebar API (used by /api/menus endpoint).
+     */
+    public function getMenusForApi(User $user): Collection
+    {
+        $userRoleIds  = $user->roles->pluck('id')->toArray();
+        $isSuperAdmin = $user->hasRole('super admin');
+
+        return Menu::with(['children.children.roles', 'children.roles', 'roles'])
+            ->mainMenus()
+            ->orderBy('order')
+            ->get()
+            ->filter(function ($menu) use ($user, $userRoleIds, $isSuperAdmin) {
+                if (!$isSuperAdmin) {
+                    $menuRoleIds = $menu->roles->pluck('id')->toArray();
+                    if (!empty($menuRoleIds) && empty(array_intersect($userRoleIds, $menuRoleIds))) {
+                        return false;
+                    }
+                }
+
+                if ($menu->permission && !$user->hasPermissionTo($menu->permission)) {
+                    return false;
+                }
+
+                if ($isSuperAdmin) {
+                    $allChildren = Menu::with(['children.roles'])
+                        ->where('parent_id', $menu->id)
+                        ->orderBy('order')
+                        ->get()
+                        ->map(function ($child) {
+                            $nested = Menu::where('parent_id', $child->id)->orderBy('order')->get();
+                            $child->setRelation('children', $nested);
+                            return $child;
+                        });
+                    $menu->setRelation('children', $allChildren);
+                } else {
+                    $menu->setRelation('children', $menu->children->filter(function ($child) use ($user, $userRoleIds) {
+                        $childRoleIds = $child->roles->pluck('id')->toArray();
+                        if (!empty($childRoleIds) && empty(array_intersect($userRoleIds, $childRoleIds))) {
+                            return false;
+                        }
+                        if ($child->active && $child->permission && !$user->hasPermissionTo($child->permission)) {
+                            return false;
+                        }
+                        $nested = Menu::where('parent_id', $child->id)->orderBy('order')->get()
+                            ->filter(function ($n) use ($user, $userRoleIds) {
+                                $nRoleIds = $n->roles->pluck('id')->toArray();
+                                if (!empty($nRoleIds) && empty(array_intersect($userRoleIds, $nRoleIds))) {
+                                    return false;
+                                }
+                                if ($n->active && $n->permission && !$user->hasPermissionTo($n->permission)) {
+                                    return false;
+                                }
+                                return true;
+                            });
+                        $child->setRelation('children', $nested);
+                        return true;
+                    }));
+                }
+
+                return true;
+            })
+            ->values();
+    }
+
+    // =========================================================================
+    // PRIVATE HELPERS
+    // =========================================================================
+
+    /**
+     * Sync menu positions (desktop_sidebar, mobile_drawer, mobile_bottom).
+     */
+    private function syncMenuPositions(Menu $menu, array $positions): void
+    {
+        $menu->positions()->delete();
+
+        if (!empty($positions['desktop_sidebar'])) {
+            MenuPosition::create(['menu_id' => $menu->id, 'device' => 'desktop', 'position' => 'sidebar']);
+        }
+        if (!empty($positions['mobile_drawer'])) {
+            MenuPosition::create(['menu_id' => $menu->id, 'device' => 'mobile', 'position' => 'drawer']);
+        }
+        if (!empty($positions['mobile_bottom'])) {
+            MenuPosition::create(['menu_id' => $menu->id, 'device' => 'mobile', 'position' => 'bottom']);
+        }
     }
 }

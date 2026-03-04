@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { usePage } from '@inertiajs/react';
 import { useToast } from '../Contexts/ToastContext';
+import { PageProps } from '@/types';
 
 /**
  * Hook untuk menampilkan toast dari Inertia flash messages
@@ -30,7 +31,7 @@ import { useToast } from '../Contexts/ToastContext';
  * ```
  */
 export function useFlashToast() {
-  const { flash } = usePage().props as any;
+  const { flash } = usePage<PageProps>().props;
   const { success, error, warning, info } = useToast();
   const processedFlashRef = useRef<string | null>(null);
 

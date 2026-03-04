@@ -21,6 +21,8 @@ return new class extends Migration
             $table->integer('order')->default(0); // Sorting
             $table->boolean('active')->default(true);
             $table->timestamps();
+
+            $table->unique(['name', 'parent_id']); // Nama menu harus unik per parent (atau per root)
         });
     }
 

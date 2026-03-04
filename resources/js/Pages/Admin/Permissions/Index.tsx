@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { CheckCircle } from 'lucide-react';
 import RoleCard from '@/Components/Permissions/RoleCard';
+import { useToast } from '@/hooks/useToast';
+import { useFlashToast } from '@/hooks/useFlashToast';
 
 interface Permission {
   id: number;
   name: string;
+  module?: string;
 }
 
 interface Role {
@@ -17,7 +18,7 @@ interface Role {
 }
 
 interface GroupedPermission {
-  [resource: string]: Permission[];
+  [module: string]: Permission[];
 }
 
 interface Props {
@@ -31,8 +32,8 @@ export default function RolePermissionManagement({
   allPermissions,
   groupedPermissions,
 }: Props) {
-  const { flash } = usePage().props as any;
-  const { error } = useToast();
+  useFlashToast();
+  const { error: showError } = useToast();
   const [expandedRole, setExpandedRole] = useState<number | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
   const [rolePermissions, setRolePermissions] = useState<{
@@ -50,7 +51,6 @@ export default function RolePermissionManagement({
     setLoading(key);
 
     try {
-      // Get CSRF token from meta tag or use router helper
       const csrfToken = document
         .querySelector('meta[name="csrf-token"]')
         ?.getAttribute('content') || '';
@@ -89,63 +89,52 @@ export default function RolePermissionManagement({
           }
         });
       } else {
-        console.error('Toggle failed:', data.message || 'Unknown error');
-        error(data.message || 'Gagal mengubah permission. Silakan coba lagi.');
+        showError(data.message || 'Gagal mengubah permission. Silakan coba lagi.');
       }
-    } catch (error) {
-      console.error('Error toggling permission:', error);
-      error('Terjadi error saat mengubah permission. Silakan coba lagi.');
+    } catch (err) {
+      console.error('Error toggling permission:', err);
+      showError('Terjadi error saat mengubah permission. Silakan coba lagi.');
     } finally {
       setLoading(null);
     }
   };
 
   return (
-    <AdminLayout title="Role & Permission Management">
-      <div className="space-y-6">
-        {/* Page Header with Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">
-            Role & Permission Management
+    <AdminLayout title="Role & Permissions">
+      <div className="space-y-4">
+        {/* Page Header */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-4">
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+            Role & Permissions
           </h1>
-          <p className="text-base text-gray-600 dark:text-gray-400">
-            Kelola hak akses berdasarkan role. Pilih role untuk melihat dan
-            mengedit permissions.
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Kelola hak akses per role. Klik role untuk mengedit permissions.
           </p>
         </div>
 
-        {/* Success Message */}
-        {flash?.success && (
-          <div className="p-4 bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 rounded-lg shadow-sm flex items-center gap-2">
-            <CheckCircle className="w-5 h-5" />
-            {flash.success}
-          </div>
-        )}
-
         {/* Role Cards */}
-        <div className="space-y-4">
-        {roles.map((role) => (
-          <RoleCard
-            key={role.id}
-            role={role}
-            isExpanded={expandedRole === role.id}
-            permissions={rolePermissions[role.id] || []}
-            allPermissionsCount={allPermissions.length}
-            groupedPermissions={groupedPermissions}
-            loading={loading}
-            onToggleExpand={() =>
-              setExpandedRole(expandedRole === role.id ? null : role.id)
-            }
-            onTogglePermission={handleToggle}
-          />
-        ))}
+        <div className="space-y-3">
+          {roles.map((role) => (
+            <RoleCard
+              key={role.id}
+              role={role}
+              isExpanded={expandedRole === role.id}
+              permissions={rolePermissions[role.id] || []}
+              allPermissionsCount={allPermissions.length}
+              groupedPermissions={groupedPermissions}
+              loading={loading}
+              onToggleExpand={() =>
+                setExpandedRole(expandedRole === role.id ? null : role.id)
+              }
+              onTogglePermission={handleToggle}
+            />
+          ))}
         </div>
 
-        {/* Info Box */}
-        <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm">
-          <p className="text-sm text-blue-900 dark:text-blue-200">
-            <strong>💡 Tip:</strong> Permissions akan disimpan otomatis saat
-            checkbox di-klik. Tidak perlu klik tombol Save.
+        {/* Tip */}
+        <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
+          <p className="text-xs text-blue-800 dark:text-blue-200">
+            <strong>Tip:</strong> Permissions disimpan otomatis saat checkbox diklik.
           </p>
         </div>
       </div>

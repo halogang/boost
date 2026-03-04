@@ -13,60 +13,25 @@ class RolePermissionSeeder extends Seeder
     {
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Create all core permissions
-        $permissions = Permissions::all();
+        // Create all core permissions with module categorization
+        $permissionsWithModules = Permissions::allWithModules();
 
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
+        foreach ($permissionsWithModules as $item) {
+            $permission = Permission::firstOrCreate(['name' => $item['name']]);
+            $permission->update(['module' => $item['module']]);
         }
+
+        // Extract all permission names
+        $permissions = array_column($permissionsWithModules, 'name');
 
         // Create roles
         $superAdminRole = Role::firstOrCreate(['name' => 'Super Admin']);
-        $ownerRole = Role::firstOrCreate(['name' => 'Owner']);
-        $managerRole = Role::firstOrCreate(['name' => 'Manager']);
-        $adminRole = Role::firstOrCreate(['name' => 'Admin']);
+        Role::firstOrCreate(['name' => 'Owner']);
+        Role::firstOrCreate(['name' => 'Manager']);
+        Role::firstOrCreate(['name' => 'Admin']);
 
-        // Super Admin: Full access to everything
+        // Super Admin gets all permissions — other roles are handled by Authorization seeders
         $superAdminRole->syncPermissions($permissions);
-
-        // Owner: Read access to all, limited write
-        $ownerRole->syncPermissions([
-            Permissions::READ_DASHBOARD,
-            Permissions::READ_USERS,
-            Permissions::READ_ROLES,
-            Permissions::READ_SETTINGS,
-            Permissions::UPDATE_SETTINGS,
-            Permissions::READ_MENUS,
-            Permissions::READ_MENU_ROLE_POSITIONS,
-            Permissions::READ_PERMISSIONS,
-            Permissions::READ_PREFERENCES,
-            Permissions::UPDATE_PREFERENCES,
-        ]);
-
-        // Manager: Full access to operational, no system config
-        $managerRole->syncPermissions([
-            Permissions::READ_DASHBOARD,
-            Permissions::CREATE_USERS,
-            Permissions::READ_USERS,
-            Permissions::UPDATE_USERS,
-            Permissions::READ_ROLES,
-            Permissions::READ_SETTINGS,
-            Permissions::UPDATE_SETTINGS,
-            Permissions::READ_MENUS,
-            Permissions::READ_MENU_ROLE_POSITIONS,
-            Permissions::READ_PERMISSIONS,
-            Permissions::READ_PREFERENCES,
-            Permissions::UPDATE_PREFERENCES,
-        ]);
-
-        // Admin: Read/write, no delete, no system config
-        $adminRole->syncPermissions([
-            Permissions::READ_DASHBOARD,
-            Permissions::READ_USERS,
-            Permissions::READ_SETTINGS,
-            Permissions::READ_PREFERENCES,
-            Permissions::UPDATE_PREFERENCES,
-        ]);
 
         $this->command->info('✅ Core roles and permissions seeded!');
     }

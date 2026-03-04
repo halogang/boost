@@ -7,7 +7,8 @@ import ThemeToggle from '@/Components/ThemeToggle';
 import { initTheme } from '@/utils/theme';
 import Modal from '@/Components/Modal';
 import { Button } from '@/Components/Button';
-import { useFlashToast } from '@/hooks/useFlashToast';
+import NotificationDropdown from '@/Components/Notifications/NotificationDropdown';
+import { PageProps } from '@/types';
 
 interface Props {
   children: ReactNode;
@@ -15,12 +16,9 @@ interface Props {
 }
 
 export default function AdminLayout({ children, title }: Props) {
-  const { auth, navigation } = usePage<any>().props;
+  const { auth, navigation, notifications } = usePage<PageProps>().props;
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-
-  // Auto-show toast from flash messages
-  useFlashToast();
 
   // Initialize theme on mount
   useEffect(() => {
@@ -95,21 +93,7 @@ export default function AdminLayout({ children, title }: Props) {
               {/* Theme Toggle */}
               <ThemeToggle />
 
-              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 relative">
-                <svg
-                  className="w-5 h-5 md:w-6 md:h-6 text-gray-600 dark:text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                  />
-                </svg>
-              </button>
+              <NotificationDropdown initialUnreadCount={notifications?.unread_count ?? 0} />
 
               <button
                 onClick={() => setShowProfileModal(true)}
@@ -125,14 +109,18 @@ export default function AdminLayout({ children, title }: Props) {
                     {auth.user?.roles &&
                     Array.isArray(auth.user.roles) &&
                     auth.user.roles.length > 0 ? (
-                      auth.user.roles.map((role: any) => (
-                        <span
-                          key={typeof role === 'string' ? role : role.id}
-                          className="inline-block text-xs bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary px-2 py-0.5 rounded font-medium"
-                        >
-                          {typeof role === 'string' ? role : role.name}
-                        </span>
-                      ))
+                      auth.user.roles.map((role) => {
+                        const key = typeof role === 'string' ? role : role.id;
+                        const label = typeof role === 'string' ? role : role.name;
+                        return (
+                          <span
+                            key={key}
+                            className="inline-block text-xs bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary px-2 py-0.5 rounded font-medium"
+                          >
+                            {label}
+                          </span>
+                        );
+                      })
                     ) : (
                       <span className="text-xs text-gray-500 dark:text-gray-400">User</span>
                     )}
@@ -171,14 +159,18 @@ export default function AdminLayout({ children, title }: Props) {
                 {auth.user?.roles &&
                 Array.isArray(auth.user.roles) &&
                 auth.user.roles.length > 0 ? (
-                  auth.user.roles.map((role: any) => (
-                    <span
-                      key={typeof role === 'string' ? role : role.id}
-                      className="inline-block text-xs bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary px-2 py-1 rounded font-medium"
-                    >
-                      {typeof role === 'string' ? role : role.name}
-                    </span>
-                  ))
+                  auth.user.roles.map((role) => {
+                    const key = typeof role === 'string' ? role : role.id;
+                    const label = typeof role === 'string' ? role : role.name;
+                    return (
+                      <span
+                        key={key}
+                        className="inline-block text-xs bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary px-2 py-1 rounded font-medium"
+                      >
+                        {label}
+                      </span>
+                    );
+                  })
                 ) : (
                   <span className="text-xs text-gray-500 dark:text-gray-400">User</span>
                 )}

@@ -70,9 +70,9 @@ class MenuSeeder extends Seeder
         ]);
         $preferences->roles()->attach($allRoleIds);
 
-        // Sistem Settings group (Super Admin only)
+        // Konfigurasi group (Super Admin only)
         $sistemSettings = Menu::create([
-            'name' => 'Sistem Settings',
+            'name' => 'Konfigurasi',
             'icon' => 'server',
             'route' => null,
             'permission' => null,
@@ -83,7 +83,7 @@ class MenuSeeder extends Seeder
         $sistemSettings->roles()->attach([$superAdminRole->id]);
 
         Menu::create([
-            'name' => 'System Settings',
+            'name' => 'Pengaturan Sistem',
             'icon' => 'settings',
             'route' => 'system.index',
             'permission' => Permissions::READ_SETTINGS,

@@ -1,13 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Link } from '@inertiajs/react';
-
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  roles: Array<{ id: number; name: string }>;
-  created_at: string;
-}
+import { User } from '@/types/admin/users';
 
 interface UserColumnsOptions {
   onDelete?: (id: number, name: string) => void;
@@ -99,5 +92,4 @@ export const createUserColumns = (options?: UserColumnsOptions): ColumnDef<User>
   },
 ];
 
-// Default export for backward compatibility
-export const userColumns = createUserColumns();
+

@@ -4,10 +4,11 @@ import PermissionCheckbox from './PermissionCheckbox';
 interface Permission {
   id: number;
   name: string;
+  module?: string;
 }
 
 interface Props {
-  resource: string;
+  module: string;
   permissions: Permission[];
   roleId: number;
   selectedPermissions: number[];
@@ -16,30 +17,35 @@ interface Props {
 }
 
 export default function PermissionGroup({
-  resource,
+  module,
   permissions,
   roleId,
   selectedPermissions,
   loading,
   onToggle,
 }: Props) {
+  const checkedCount = permissions.filter((p) =>
+    selectedPermissions.includes(p.id)
+  ).length;
+
   return (
-    <div>
-      {/* Resource Header */}
-      <div className="mb-3">
-        <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-          📦 {resource}
+    <div className="flex flex-col gap-1.5">
+      {/* Module Header */}
+      <div className="flex items-center gap-2">
+        <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          {module}
         </h4>
-        <div className="mt-2 h-px bg-gray-200" />
+        <span className="text-[10px] text-gray-400 dark:text-gray-500">
+          {checkedCount}/{permissions.length}
+        </span>
       </div>
 
-      {/* Permission Checkboxes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      {/* Compact checkboxes in a wrap layout */}
+      <div className="flex flex-wrap gap-x-5 gap-y-1.5 pl-1">
         {permissions.map((permission) => (
           <PermissionCheckbox
             key={permission.id}
             permission={permission}
-            roleId={roleId}
             isChecked={selectedPermissions.includes(permission.id)}
             isLoading={loading === `${roleId}-${permission.id}`}
             onToggle={() => onToggle(roleId, permission.id)}

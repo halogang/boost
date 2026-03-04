@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\Authorization\AllAuthorizationSeeder;
 use Database\Seeders\Core\MenuPositionSeeder;
 use Database\Seeders\Core\MenuSeeder;
 use Database\Seeders\Core\RolePermissionSeeder;
@@ -33,5 +34,8 @@ class DatabaseSeeder extends Seeder
 
         // 5. Core - Default settings
         $this->call(SettingsSeeder::class);
+
+        // 6. Authorization - Assign permissions, menus & positions per role
+        $this->call(AllAuthorizationSeeder::class);
     }
 }

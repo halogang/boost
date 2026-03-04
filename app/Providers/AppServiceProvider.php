@@ -3,12 +3,15 @@
 namespace App\Providers;
 
 use App\Models\Settings;
+use App\Policies\PermissionPolicy;
 use App\Services\MenuService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Permission;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +29,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Manually register Spatie Permission policy (auto-discovery won't match)
+        Gate::policy(Permission::class, PermissionPolicy::class);
+
         Vite::prefetch(concurrency: 3);
 
         // Share settings to all views (for app.blade.php)

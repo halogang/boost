@@ -6,7 +6,7 @@ import { Button } from '@/Components/Button';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
-
+import { PageProps } from '@/types';
 interface User {
   id: number;
   name: string;
@@ -20,7 +20,7 @@ interface Props {
 
 export default function Profile({ user }: Props) {
   const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile');
-  const page = usePage<any>();
+  const page = usePage<PageProps>();
   const flashMessage = page.props.flash?.success;
 
   // Profile form

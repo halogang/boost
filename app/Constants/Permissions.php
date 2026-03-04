@@ -4,6 +4,11 @@ namespace App\Constants;
 
 class Permissions
 {
+    // Module constants
+    public const MODULE_DASHBOARD = 'Dashboard';
+    public const MODULE_USER_MANAGEMENT = 'User Management';
+    public const MODULE_SYSTEM = 'System';
+
     // Dashboard
     public const READ_DASHBOARD = 'read dashboard';
 
@@ -82,5 +87,53 @@ class Permissions
             self::READ_PREFERENCES,
             self::UPDATE_PREFERENCES,
         ];
+    }
+
+    /**
+     * Get all permissions with their module categorization.
+     *
+     * Returns array of ['name' => 'permission name', 'module' => 'Module Name']
+     */
+    public static function allWithModules(): array
+    {
+        return [
+            // Dashboard
+            ['name' => self::READ_DASHBOARD, 'module' => self::MODULE_DASHBOARD],
+
+            // User Management
+            ['name' => self::CREATE_USERS, 'module' => self::MODULE_USER_MANAGEMENT],
+            ['name' => self::READ_USERS, 'module' => self::MODULE_USER_MANAGEMENT],
+            ['name' => self::UPDATE_USERS, 'module' => self::MODULE_USER_MANAGEMENT],
+            ['name' => self::DELETE_USERS, 'module' => self::MODULE_USER_MANAGEMENT],
+            ['name' => self::CREATE_ROLES, 'module' => self::MODULE_USER_MANAGEMENT],
+            ['name' => self::READ_ROLES, 'module' => self::MODULE_USER_MANAGEMENT],
+            ['name' => self::UPDATE_ROLES, 'module' => self::MODULE_USER_MANAGEMENT],
+            ['name' => self::DELETE_ROLES, 'module' => self::MODULE_USER_MANAGEMENT],
+            ['name' => self::READ_PERMISSIONS, 'module' => self::MODULE_USER_MANAGEMENT],
+
+            // System
+            ['name' => self::READ_SETTINGS, 'module' => self::MODULE_SYSTEM],
+            ['name' => self::UPDATE_SETTINGS, 'module' => self::MODULE_SYSTEM],
+            ['name' => self::CREATE_MENUS, 'module' => self::MODULE_SYSTEM],
+            ['name' => self::READ_MENUS, 'module' => self::MODULE_SYSTEM],
+            ['name' => self::UPDATE_MENUS, 'module' => self::MODULE_SYSTEM],
+            ['name' => self::DELETE_MENUS, 'module' => self::MODULE_SYSTEM],
+            ['name' => self::READ_MENU_ROLE_POSITIONS, 'module' => self::MODULE_SYSTEM],
+            ['name' => self::UPDATE_MENU_ROLE_POSITIONS, 'module' => self::MODULE_SYSTEM],
+            ['name' => self::READ_PREFERENCES, 'module' => self::MODULE_SYSTEM],
+            ['name' => self::UPDATE_PREFERENCES, 'module' => self::MODULE_SYSTEM],
+        ];
+    }
+
+    /**
+     * Get module mapping: permission name => module name.
+     */
+    public static function moduleMap(): array
+    {
+        $map = [];
+        foreach (self::allWithModules() as $item) {
+            $map[$item['name']] = $item['module'];
+        }
+        return $map;
     }
 }

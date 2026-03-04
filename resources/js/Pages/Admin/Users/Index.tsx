@@ -3,12 +3,18 @@ import { Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageHeader } from '@/Components/PageHeader';
 import { DataTable, DataTableServerResponse } from '@/Components/DataTable';
-import { createUserColumns, User } from './columns';
+import { createUserColumns } from './columns';
+import { User } from '@/types/admin/users';
 import { Button } from '@/Components/Button';
 import { useCrudActions } from '@/hooks/useCrudActions';
 import { useConfirmationModal } from '@/Components/ConfirmationProvider';
+import { useFlashToast } from '@/hooks/useFlashToast';
 
 interface PaginatedResponse extends DataTableServerResponse<User> {}
+
+interface FilterValues {
+  role?: string;
+}
 
 interface Role {
   id: number;
@@ -26,6 +32,7 @@ interface Props {
 }
 
 export default function Index({ users, roles, filters }: Props) {
+  useFlashToast();
   const [isLoading, setIsLoading] = useState(false);
   const confirmationModal = useConfirmationModal();
   const { handleDelete } = useCrudActions({
@@ -76,7 +83,7 @@ export default function Index({ users, roles, filters }: Props) {
     );
   };
 
-  const handleFilterChange = (filterValues: Record<string, any>) => {
+  const handleFilterChange = (filterValues: FilterValues) => {
     setIsLoading(true);
     router.get(
       '/users',

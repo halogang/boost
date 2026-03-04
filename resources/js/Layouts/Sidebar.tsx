@@ -3,6 +3,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { cn } from '@/lib/utils';
 import { useConfirmationModal } from '@/Components/ConfirmationProvider';
+import { NavigationMenuItem, PageProps } from '@/types';
 
 function LogoutButton() {
   const { confirm } = useConfirmationModal();
@@ -23,7 +24,7 @@ function LogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200"
+      className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200"
     >
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -33,20 +34,8 @@ function LogoutButton() {
   );
 }
 
-interface MenuItem {
-  id: number;
-  name: string;
-  icon: string;
-  route: string | null;
-  permission: string | null;
-  parent_id: number | null;
-  order: number;
-  active: boolean;
-  children?: MenuItem[];
-}
-
 export default function Sidebar() {
-  const { props, url } = usePage<any>();
+  const { props, url } = usePage<PageProps>();
   const primaryColor = props.settings?.primary_color || '#2563eb';
   
   // Helper function to check if color is light (for text contrast)
@@ -79,7 +68,7 @@ export default function Sidebar() {
 
   const menus = props.navigation?.sidebar || [];
 
-  const isActive = (routeName: string | null) => {
+  const isActive = (routeName: string | null | undefined) => {
     if (!routeName) return false;
     try {
       const routePath = route(routeName).replace(window.location.origin, '');
@@ -91,7 +80,7 @@ export default function Sidebar() {
     }
   };
 
-  const hasActiveChild = (children: MenuItem[] | undefined): boolean => {
+  const hasActiveChild = (children: NavigationMenuItem[] | undefined): boolean => {
     if (!children || children.length === 0) return false;
     return children.some(child => {
       if (isActive(child.route)) return true;
@@ -140,7 +129,9 @@ export default function Sidebar() {
     return icons[iconName] || icons['home'];
   };
 
-  const renderMenuItem = (menu: MenuItem, level: number = 0) => {
+  const getLevelPadding = (level: number) => `${16 + level * 16}px`;
+
+  const renderMenuItem = (menu: NavigationMenuItem, level: number = 0) => {
     const hasChildren = menu.children && menu.children.length > 0;
     const isExpanded = expandedMenus.includes(menu.id);
     const active = isActive(menu.route);
@@ -149,20 +140,22 @@ export default function Sidebar() {
 
     if (hasChildren) {
       return (
-        <div key={menu.id} className={cn(level > 0 && 'ml-2')}>
+        <div key={menu.id}>
           <button
             onClick={() => !isDisabled && toggleSubmenu(menu.id)}
             disabled={isDisabled}
             className={cn(
-              'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200',
+              'w-full flex items-center gap-3 py-2.5 pr-4 transition-all duration-200',
               isDisabled && 'opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-500',
-              !isDisabled && !hasActive && 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-primary-400'
+              !isDisabled && 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-primary-400'
             )}
-            style={(hasActive || isExpanded) && !isDisabled ? {
-              backgroundColor: primaryColor,
-              color: textColor,
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-            } : undefined}
+            style={{
+              paddingLeft: getLevelPadding(level),
+              ...(hasActive && !isExpanded && !isDisabled ? {
+                backgroundColor: primaryColor,
+                color: textColor,
+              } : {}),
+            }}
           >
             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIconSvg(menu.icon || 'home')} />
@@ -189,7 +182,7 @@ export default function Sidebar() {
           </button>
 
           {isExpanded && (
-            <div className="mt-1 ml-4 pl-3 border-l-2 border-primary-200 dark:border-primary-800 space-y-1">
+            <div className="mt-0.5 space-y-0.5">
               {menu.children?.map((child) => renderMenuItem(child, level + 1))}
             </div>
           )}
@@ -203,14 +196,16 @@ export default function Sidebar() {
           key={menu.id}
           href={route(menu.route)}
           className={cn(
-            'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200',
+            'flex items-center gap-3 py-2.5 pr-4 transition-all duration-200',
             !active && 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-primary-400'
           )}
-          style={active ? {
-            backgroundColor: primaryColor,
-            color: textColor,
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-          } : undefined}
+          style={{
+            paddingLeft: getLevelPadding(level),
+            ...(active ? {
+              backgroundColor: primaryColor,
+              color: textColor,
+            } : {}),
+          }}
         >
           <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIconSvg(menu.icon || 'home')} />
@@ -224,7 +219,8 @@ export default function Sidebar() {
       return (
         <div
           key={menu.id}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-500"
+          className="flex items-center gap-3 py-2.5 pr-4 opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-500"
+          style={{ paddingLeft: getLevelPadding(level) }}
         >
           <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIconSvg(menu.icon || 'home')} />
@@ -260,12 +256,12 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 overflow-y-auto space-y-1">
-        {menus.map((menu: MenuItem) => renderMenuItem(menu))}
+      <nav className="flex-1 py-2 overflow-y-auto space-y-0.5">
+        {menus.map((menu: NavigationMenuItem) => renderMenuItem(menu))}
       </nav>
 
       {/* Logout */}
-      <div className="p-3 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
+      <div className="py-2 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
         <LogoutButton />
       </div>
     </aside>

@@ -3,6 +3,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { cn } from '@/lib/utils';
 import { useConfirmationModal } from '@/Components/ConfirmationProvider';
+import { NavigationMenuItem, PageProps } from '@/types';
 
 function LogoutButton() {
   const { confirm } = useConfirmationModal();
@@ -33,26 +34,14 @@ function LogoutButton() {
   );
 }
 
-interface MenuItem {
-  id: number;
-  name: string;
-  icon: string;
-  route: string | null;
-  permission: string | null;
-  parent_id: number | null;
-  order: number;
-  active: boolean;
-  children?: MenuItem[];
-}
-
 interface MobileDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  menus: MenuItem[];
+  menus: NavigationMenuItem[];
 }
 
 export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerProps) {
-  const { url, props } = usePage<any>();
+  const { url, props } = usePage<PageProps>();
   const primaryColor = props.settings?.primary_color || '#2563eb';
   
   // Helper function to check if color is light (for text contrast)
@@ -83,7 +72,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
     return [];
   });
 
-  const isActive = (routeName: string | null) => {
+  const isActive = (routeName: string | null | undefined) => {
     if (!routeName) return false;
     try {
       const routePath = route(routeName).replace(window.location.origin, '');
@@ -95,7 +84,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
     }
   };
 
-  const hasActiveChild = (children: MenuItem[] | undefined): boolean => {
+  const hasActiveChild = (children: NavigationMenuItem[] | undefined): boolean => {
     if (!children || children.length === 0) return false;
     return children.some(child => {
       if (isActive(child.route)) return true;
@@ -148,7 +137,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
     onClose();
   };
 
-  const renderMenuItem = (menu: MenuItem, level: number = 0) => {
+  const renderMenuItem = (menu: NavigationMenuItem, level: number = 0) => {
     const hasChildren = menu.children && menu.children.length > 0;
     const isExpanded = expandedMenus.includes(menu.id);
     const active = isActive(menu.route);

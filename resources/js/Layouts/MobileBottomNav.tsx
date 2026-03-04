@@ -1,22 +1,11 @@
 import { Link, usePage, router } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { useState } from 'react';
-
-interface MenuItem {
-  id: number;
-  name: string;
-  icon: string;
-  route: string | null;
-  permission: string | null;
-  parent_id: number | null;
-  order: number;
-  active: boolean;
-  children?: MenuItem[];
-}
+import { NavigationMenuItem, PageProps } from '@/types';
 
 export default function MobileBottomNav() {
-  const { props, url } = usePage<any>();
-  const [showSubmenuModal, setShowSubmenuModal] = useState<MenuItem | null>(null);
+  const { props, url } = usePage<PageProps>();
+  const [showSubmenuModal, setShowSubmenuModal] = useState<NavigationMenuItem | null>(null);
 
   // Get bottom nav menus from Inertia share
   const menus = props.navigation?.bottom || [];
@@ -24,13 +13,13 @@ export default function MobileBottomNav() {
   // Show all menus that are selected (no filtering)
   const displayMenus = menus;
 
-  const isActive = (route: string | null) => {
+  const isActive = (route: string | null | undefined) => {
     if (!route) return false;
     return url.startsWith(`/${route}`);
   };
 
   // Handle menu click - if no route and has children, show submenu modal
-  const handleMenuClick = (e: React.MouseEvent, menu: MenuItem) => {
+  const handleMenuClick = (e: React.MouseEvent, menu: NavigationMenuItem) => {
     if (!menu.route) {
       e.preventDefault();
       // If menu has children, show submenu modal
@@ -41,7 +30,7 @@ export default function MobileBottomNav() {
     }
   };
 
-  const handleSubmenuClick = (childMenu: MenuItem) => {
+  const handleSubmenuClick = (childMenu: NavigationMenuItem) => {
     // If menu has route, navigate to it
     if (childMenu.route) {
       router.visit(route(childMenu.route));
@@ -71,7 +60,7 @@ export default function MobileBottomNav() {
     <>
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-50">
         <div className="flex items-center justify-around">
-          {displayMenus.map((menu: MenuItem) => {
+          {displayMenus.map((menu: NavigationMenuItem) => {
             const active = isActive(menu.route);
             const hasChildren = menu.children && menu.children.length > 0;
             

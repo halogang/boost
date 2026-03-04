@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\MenuRolePositionController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -56,6 +57,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/menu-role-positions', [MenuRolePositionController::class, 'index'])->name('menu-role-positions.index');
     Route::post('/menu-role-positions/roles/{role}', [MenuRolePositionController::class, 'updateRolePositions'])->name('menu-role-positions.update');
     
+    // Notifications (JSON API for header dropdown)
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/recent', [NotificationController::class, 'recent'])->name('recent');
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
+    });
+
     // Permissions
     Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
     Route::post('/permissions/roles/{role}', [PermissionController::class, 'updateRolePermissions'])->name('permissions.update');
