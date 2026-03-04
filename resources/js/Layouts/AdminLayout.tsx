@@ -81,11 +81,14 @@ export default function AdminLayout({ children, title }: Props) {
 
             {/* Mobile: Logo di tengah (absolute positioning) */}
             <div className="md:hidden absolute left-1/2 transform -translate-x-1/2">
-              <img
-                src="/AJIB-DARKAH-INDONESIA.png"
-                alt="Ajib Darkah Indonesia"
-                className="h-10 w-auto"
-              />
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4v10" />
+                  </svg>
+                </div>
+                <span className="text-base font-bold text-gray-900 dark:text-white">App Name</span>
+              </div>
             </div>
 
             {/* Right: Theme Toggle + Notification + User Profile */}
