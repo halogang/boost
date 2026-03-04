@@ -242,15 +242,13 @@ export default function Sidebar() {
       <div className="p-5 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-br from-primary-50 to-white dark:from-gray-900 dark:to-gray-900">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center shadow-md">
-            <img
-              src="/AJIB-DARKAH-INDONESIA.png"
-              alt="Ajib Darkah Indonesia"
-              className="w-10 h-10 object-contain"
-            />
+            <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4v10" />
+            </svg>
           </div>
           <div>
-            <h2 className="font-bold text-base text-gray-900 dark:text-white">Ajib Darkah</h2>
-            <p className="text-xs text-gray-600 dark:text-gray-400">Delivery System</p>
+            <h2 className="font-bold text-base text-gray-900 dark:text-white">App Name</h2>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Management System</p>
           </div>
         </div>
       </div>

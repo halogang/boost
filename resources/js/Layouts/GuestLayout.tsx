@@ -1,43 +1,51 @@
-import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Link } from '@inertiajs/react';
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useEffect } from 'react';
+import ThemeToggle from '@/Components/ThemeToggle';
+import { initTheme } from '@/utils/theme';
 
 export default function Guest({ children }: PropsWithChildren) {
+    useEffect(() => {
+        initTheme();
+    }, []);
+
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMyIvPjwvZz48L2c+PC9zdmc+')] opacity-40"></div>
-            
+        <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+
+            {/* Theme Toggle — top right */}
+            <div className="absolute top-4 right-4">
+                <ThemeToggle />
+            </div>
+
             <div className="relative w-full px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto w-full max-w-md">
                     {/* Logo Section */}
                     <div className="mb-8 flex justify-center">
                         <Link href="/" className="group">
                             <div className="flex flex-col items-center space-y-3">
-                                <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-lg transition-transform duration-300 group-hover:scale-105 p-2">
-                                    <img
-                                        src="/AJIB-DARKAH-INDONESIA.png"
-                                        alt="Ajib Darkah Indonesia"
-                                        className="w-full h-full object-contain"
-                                    />
+                                <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white dark:bg-gray-800 shadow-lg transition-transform duration-300 group-hover:scale-105 p-3 ring-1 ring-gray-200 dark:ring-gray-700">
+                                    {/* Replace with your app logo */}
+                                    <svg className="w-full h-full text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4v10" />
+                                    </svg>
                                 </div>
                                 <div className="text-center">
-                                    <h1 className="text-3xl font-bold text-gray-800">Ajib Darkah</h1>
-                                    <p className="text-sm text-gray-600">ERP Management System</p>
+                                    <h1 className="text-3xl font-bold text-gray-800 dark:text-white">App Name</h1>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Lorem ipsum dolor sit amet</p>
                                 </div>
                             </div>
                         </Link>
                     </div>
 
                     {/* Card */}
-                    <div className="overflow-hidden rounded-2xl bg-white/80 backdrop-blur-xl shadow-2xl ring-1 ring-black/5">
+                    <div className="overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl ring-1 ring-gray-200 dark:ring-gray-700">
                         <div className="px-8 py-10 sm:px-10">
                             {children}
                         </div>
                     </div>
 
                     {/* Footer */}
-                    <p className="mt-8 text-center text-sm text-gray-600">
-                        © {new Date().getFullYear()} Ajib Darkah Indonesia. All rights reserved.
+                    <p className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                        © {new Date().getFullYear()} Your Company Name. All rights reserved.
                     </p>
                 </div>
             </div>

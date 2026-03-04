@@ -103,22 +103,12 @@ class MenuSeeder extends Seeder
         ])->roles()->attach([$superAdminRole->id]);
 
         Menu::create([
-            'name' => 'Kelola Menu',
-            'icon' => 'list',
-            'route' => 'menus.index',
-            'permission' => Permissions::READ_MENUS,
-            'parent_id' => $sistemSettings->id,
-            'order' => 3,
-            'active' => true,
-        ])->roles()->attach([$superAdminRole->id]);
-
-        Menu::create([
-            'name' => 'Menu per Role',
+            'name' => 'Akses Menu',
             'icon' => 'users',
             'route' => 'menu-role-positions.index',
             'permission' => Permissions::READ_MENU_ROLE_POSITIONS,
             'parent_id' => $sistemSettings->id,
-            'order' => 4,
+            'order' => 3,
             'active' => true,
         ])->roles()->attach([$superAdminRole->id]);
 
@@ -144,9 +134,9 @@ class MenuSeeder extends Seeder
         ]);
         $managementData->roles()->attach([$superAdminRole->id]);
 
-        // System submenu under Management Data
-        $system = Menu::create([
-            'name' => 'System',
+        // Sistem group under Management Data
+        $sistemData = Menu::create([
+            'name' => 'Sistem',
             'icon' => 'server',
             'route' => null,
             'permission' => null,
@@ -154,15 +144,25 @@ class MenuSeeder extends Seeder
             'order' => 1,
             'active' => true,
         ]);
-        $system->roles()->attach([$superAdminRole->id]);
+        $sistemData->roles()->attach([$superAdminRole->id]);
 
         Menu::create([
-            'name' => 'Users',
+            'name' => 'Pengguna',
             'icon' => 'users',
             'route' => 'users.index',
             'permission' => Permissions::READ_USERS,
-            'parent_id' => $system->id,
+            'parent_id' => $sistemData->id,
             'order' => 1,
+            'active' => true,
+        ])->roles()->attach([$superAdminRole->id]);
+
+        Menu::create([
+            'name' => 'Menu',
+            'icon' => 'list',
+            'route' => 'menus.index',
+            'permission' => Permissions::READ_MENUS,
+            'parent_id' => $sistemData->id,
+            'order' => 2,
             'active' => true,
         ])->roles()->attach([$superAdminRole->id]);
 

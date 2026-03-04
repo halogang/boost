@@ -29,12 +29,12 @@ export default function Login({
 
     return (
         <GuestLayout>
-            <Head title="Login - Ajib Darkah" />
+            <Head title="Login" />
 
             <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
-                <p className="mt-2 text-sm text-gray-600">
-                    Sign in to your account to continue
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Selamat Datang</h2>
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    Masuk ke akun Anda untuk melanjutkan
                 </p>
             </div>
 
@@ -47,7 +47,7 @@ export default function Login({
             <form onSubmit={submit} className="space-y-6">
                 {/* Email Field */}
                 <div>
-                    <InputLabel htmlFor="email" value="Email Address" className="mb-2 text-sm font-semibold text-gray-700" />
+                    <InputLabel htmlFor="email" value="Email" className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300" />
 
                     <div className="relative">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -83,7 +83,7 @@ export default function Login({
 
                 {/* Password Field */}
                 <div>
-                    <InputLabel htmlFor="password" value="Password" className="mb-2 text-sm font-semibold text-gray-700" />
+                    <InputLabel htmlFor="password" value="Password" className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300" />
 
                     <div className="relative">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -130,8 +130,8 @@ export default function Login({
                             }
                             className="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500"
                         />
-                        <span className="ml-2 text-sm text-gray-600">
-                            Remember me
+                        <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                            Ingat saya
                         </span>
                     </label>
 
@@ -140,7 +140,7 @@ export default function Login({
                             href={route('password.request')}
                             className="text-sm font-medium text-blue-600 transition-colors hover:text-blue-500 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
                         >
-                            Forgot password?
+                            Lupa kata sandi?
                         </Link>
                     )}
                 </div>
@@ -173,10 +173,10 @@ export default function Login({
                                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                     ></path>
                                 </svg>
-                                Signing in...
+                                Memproses...
                             </span>
                         ) : (
-                            'Sign In'
+                            'Masuk'
                         )}
                     </button>
                 </div>

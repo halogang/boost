@@ -1,550 +1,276 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import ApplicationLogo from '@/Components/ApplicationLogo';
+import { motion } from 'framer-motion';
+import ThemeToggle from '@/Components/ThemeToggle';
+import { initTheme } from '@/utils/theme';
 
 export default function Landing() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const { scrollY } = useScroll();
-  const opacity = useTransform(scrollY, [0, 100], [1, 0]);
-  const y = useTransform(scrollY, [0, 100], [0, -50]);
+    useEffect(() => {
+        initTheme();
+    }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.3,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-      },
-    },
-  };
-
-  const waterWaveVariants = {
-    animate: {
-      x: ['-100%', '0%'],
-      transition: {
-        x: {
-          repeat: Infinity,
-          duration: 20,
-          ease: 'linear' as const,
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: { staggerChildren: 0.15, delayChildren: 0.2 },
         },
-      },
-    },
-  };
+    };
 
-  return (
-    <>
-      <Head>
-        <title>Ajib Darkah - Air Minum Pegunungan Terbaik di Cilacap</title>
-        <meta
-          name="description"
-          content="Ajib Darkah - Air minum pegunungan terbaik dari mata air Pegunungan Pancasan Ajibarang. TDS rendah, pH stabil, segar dan sehat untuk konsumsi sehari-hari. Pesan sekarang!"
-        />
-        <meta
-          name="keywords"
-          content="air minum galon, depot air minum, air pegunungan, ajib darkah, air minum cilacap, air minum berkualitas"
-        />
-        <meta property="og:title" content="Ajib Darkah - Air Minum Pegunungan Terbaik" />
-        <meta
-          property="og:description"
-          content="Air minum yang berasal dari mata air Pegunungan Pancasan Ajibarang, diolah menggunakan teknologi canggih dan telah melalui pengujian sesuai standar kualitas produk."
-        />
-        <meta property="og:image" content="/AJIB-DARKAH-INDONESIA.png" />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <link rel="canonical" href="https://ajibdarkah.com/" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'Organization',
-              name: 'Ajib Darkah',
-              description:
-                'Perusahaan pengolahan dan pelayanan air minum dalam kemasan yang menjadi pelopor air minum pegunungan terbaik di Cilacap',
-              url: 'https://ajibdarkah.com',
-              logo: 'https://ajibdarkah.com/AJIB-DARKAH-INDONESIA.png',
-              contactPoint: {
-                '@type': 'ContactPoint',
-                contactType: 'Customer Service',
-                availableLanguage: 'Indonesian',
-              },
-            }),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'Product',
-              name: 'Ajib Darkah Air Minum Pegunungan',
-              description:
-                'Air minum yang berasal dari mata air Pegunungan Pancasan Ajibarang, diolah menggunakan teknologi canggih',
-              brand: {
-                '@type': 'Brand',
-                name: 'Ajib Darkah',
-              },
-              offers: {
-                '@type': 'Offer',
-                availability: 'https://schema.org/InStock',
-                priceCurrency: 'IDR',
-              },
-            }),
-          }}
-        />
-      </Head>
+    const itemVariants = {
+        hidden: { opacity: 0, y: 24 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.5, ease: 'easeOut' as const },
+        },
+    };
 
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100 overflow-hidden">
-        {/* Animated Water Background */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-          <motion.div
-            className="absolute inset-0 opacity-20"
-            variants={waterWaveVariants}
-            animate="animate"
-            style={{
-              background: 'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent)',
-            }}
-          />
-          <motion.div
-            className="absolute inset-0 opacity-10"
-            variants={waterWaveVariants}
-            animate="animate"
-            style={{
-              background: 'linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.3), transparent)',
-              animationDelay: '10s',
-            }}
-          />
-        </div>
+    return (
+        <>
+            <Head title="Welcome" />
 
-        {/* Navigation */}
-        <motion.nav
-          className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-            isScrolled
-              ? 'bg-white/95 backdrop-blur-lg shadow-lg'
-              : 'bg-transparent'
-          }`}
-          initial={{ y: -100 }}
-          animate={{ y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
-            <div className="flex items-center justify-between h-20">
-              <Link href="/" className="flex items-center gap-3">
-                <img
-                  src="/AJIB-DARKAH-INDONESIA.png"
-                  alt="Ajib Darkah Indonesia"
-                  className="h-12 w-auto"
-                />
-                <span className="text-xl font-bold text-gray-900">Ajib Darkah</span>
-              </Link>
+            <div className="min-h-screen bg-white dark:bg-gray-950 transition-colors duration-300">
+                {/* Navbar */}
+                <nav className="fixed top-0 inset-x-0 z-50 border-b border-gray-200/60 dark:border-gray-800/60 bg-white/80 dark:bg-gray-950/80 backdrop-blur-lg">
+                    <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+                        <Link href="/" className="flex items-center gap-2">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white">
+                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4v10" />
+                                </svg>
+                            </div>
+                            <span className="text-lg font-bold text-gray-900 dark:text-white">App Name</span>
+                        </Link>
 
-              <div className="hidden md:flex items-center gap-8">
-                <Link
-                  href="#tentang"
-                  className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
-                >
-                  Tentang Kami
-                </Link>
-                <Link
-                  href="#produk"
-                  className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
-                >
-                  Produk
-                </Link>
-                <Link
-                  href="#kemitraan"
-                  className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
-                >
-                  Kemitraan
-                </Link>
-                <Link
-                  href="/order"
-                  className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl"
-                >
-                  Pesan Sekarang
-                </Link>
-              </div>
+                        <div className="flex items-center gap-3">
+                            <ThemeToggle />
+                            <Link
+                                href={route('login')}
+                                className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                Masuk
+                            </Link>
+                            <Link
+                                href={route('login')}
+                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm"
+                            >
+                                Mulai Sekarang
+                            </Link>
+                        </div>
+                    </div>
+                </nav>
 
-              <button className="md:hidden p-2 text-gray-700">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </motion.nav>
+                {/* Hero Section */}
+                <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 pt-20">
+                    {/* Background decoration */}
+                    <div className="pointer-events-none absolute inset-0">
+                        <div className="absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-blue-100 dark:bg-blue-900/20 blur-3xl" />
+                        <div className="absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-cyan-100 dark:bg-cyan-900/20 blur-3xl" />
+                    </div>
 
-        {/* Hero Section */}
-        <section className="relative min-h-screen flex items-center pt-20 pb-32 px-4 sm:px-6 lg:px-8 xl:px-12 overflow-hidden">
-          {/* Mountain Background */}
-          <div
-            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: 'url(/pegunungan-bg.jpg)',
-              backgroundPosition: 'center bottom',
-            }}
-          >
-            {/* Overlay biru lembut untuk readability */}
-            <div className="absolute inset-0 bg-gradient-to-b from-blue-100/50 via-blue-50/40 to-blue-100/50"></div>
-            {/* Overlay tambahan untuk depth */}
-            <div className="absolute inset-0 bg-gradient-to-t from-blue-200/30 via-transparent to-transparent"></div>
-          </div>
-
-          <motion.div
-            className="w-full z-10 relative"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
-              {/* Text - Left */}
-              <motion.div variants={itemVariants} className="text-left relative z-10">
-                <motion.h1
-                  variants={itemVariants}
-                  className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight drop-shadow-lg"
-                >
-                  <span className="block">Ajib Darkah</span>
-                  <span className="block text-blue-700 mt-2">Kebaikan Air Menebarkan Berkah</span>
-                </motion.h1>
-
-                <motion.p
-                  variants={itemVariants}
-                  className="text-xl md:text-2xl text-gray-800 mb-12 leading-relaxed drop-shadow-md"
-                >
-                  Air minum yang berasal dari mata air Pegunungan Pancasan Ajibarang, diolah menggunakan
-                  teknologi canggih dan telah melalui pengujian sesuai standar kualitas produk. Dengan TDS
-                  rendah dan pH yang stabil menjadikan air segar dan cocok dikonsumsi sehari-hari.
-                </motion.p>
-
-                <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4">
-                  <Link
-                    href="/order"
-                    className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-all shadow-xl hover:shadow-2xl hover:scale-105 transform text-center"
-                  >
-                    Pesan Sekarang
-                  </Link>
-                  <Link
-                    href="#tentang"
-                    className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-all shadow-xl border-2 border-blue-600 text-center"
-                  >
-                    Pelajari Lebih Lanjut
-                  </Link>
-                </motion.div>
-              </motion.div>
-
-              {/* Photo - Right */}
-              <motion.div variants={itemVariants} className="flex justify-center lg:justify-start xl:justify-center relative z-10">
-                <motion.div
-                  className="relative group"
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 200,
-                    damping: 15,
-                    delay: 0.2,
-                  }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-transparent rounded-2xl blur-xl group-hover:blur-2xl transition-all"></div>
-                  <img
-                    src="/landing.png"
-                    alt="Depot Air Minum Ajib Darkah"
-                    className="h-64 md:h-80 lg:h-96 w-auto rounded-2xl shadow-2xl object-cover relative z-10 border-4 border-white/50"
-                    onError={(e) => {
-                      // Fallback jika gambar tidak ditemukan
-                      (e.target as HTMLImageElement).src = '/AJIB-DARKAH-INDONESIA.png';
-                    }}
-                  />
-                </motion.div>
-              </motion.div>
-            </div>
-          </motion.div>
-
-          {/* Floating Water Drops Animation */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {typeof window !== 'undefined' && [...Array(10)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-4 h-4 bg-blue-400/30 rounded-full"
-                initial={{
-                  x: Math.random() * (window.innerWidth || 1200),
-                  y: (window.innerHeight || 800) + 100,
-                  opacity: 0,
-                }}
-                animate={{
-                  y: -100,
-                  opacity: [0, 1, 0],
-                }}
-                transition={{
-                  duration: Math.random() * 3 + 2,
-                  repeat: Infinity,
-                  delay: Math.random() * 2,
-                  ease: 'linear',
-                }}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* About Section */}
-        <section id="tentang" className="relative py-32 px-4 sm:px-6 lg:px-8 bg-white">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Tentang Kami</h2>
-              <div className="w-24 h-1 bg-blue-600 mx-auto mb-6"></div>
-            </motion.div>
-
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-              >
-                <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-cyan-500"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
                     <motion.div
-                      animate={{
-                        scale: [1, 1.1, 1],
-                        rotate: [0, 5, -5, 0],
-                      }}
-                      transition={{
-                        duration: 4,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                      }}
-                      className="text-8xl">💧</motion.div>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="space-y-6"
-              >
-                <h3 className="text-3xl font-bold text-gray-900">Air Minum Pegunungan Terbaik</h3>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  Ajib Darkah merupakan perusahaan pengolahan dan pelayanan air minum dalam kemasan
-                  yang menjadi pelopor air minum pegunungan terbaik di Cilacap, berdiri sejak 2018
-                  hingga saat ini.
-                </p>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  Dengan komitmen untuk menyediakan air minum berkualitas tinggi, kami menggunakan
-                  teknologi canggih dalam proses pengolahan dan memastikan setiap produk memenuhi
-                  standar kualitas yang ketat.
-                </p>
-                <Link
-                  href="#produk"
-                  className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl"
-                >
-                  Lihat Produk Kami
-                </Link>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* Products Section */}
-        <section id="produk" className="relative py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-cyan-50">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Produk Ajib Darkah</h2>
-              <div className="w-24 h-1 bg-blue-600 mx-auto mb-6"></div>
-              <p className="text-xl text-gray-700 max-w-2xl mx-auto">
-                Air minum berkualitas tinggi dengan TDS rendah dan pH stabil untuk kesehatan optimal
-              </p>
-            </motion.div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  title: 'Air Galon 19L',
-                  description: 'Air minum dalam kemasan galon 19 liter, praktis untuk kebutuhan rumah tangga',
-                  icon: '💧',
-                },
-                {
-                  title: 'Air Botol 600ml',
-                  description: 'Air minum dalam kemasan botol 600ml, mudah dibawa kemana saja',
-                  icon: '🥤',
-                },
-                {
-                  title: 'Air Botol 1500ml',
-                  description: 'Air minum dalam kemasan botol 1.5 liter, ekonomis untuk keluarga',
-                  icon: '🍶',
-                },
-              ].map((product, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.2 }}
-                  whileHover={{ y: -10, scale: 1.05 }}
-                  className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all"
-                >
-                  <div className="text-6xl mb-4 text-center">{product.icon}</div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">{product.title}</h3>
-                  <p className="text-gray-700 text-center mb-6">{product.description}</p>
-                  <div className="text-center">
-                    <Link
-                      href="/order"
-                      className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all"
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="relative z-10 mx-auto max-w-3xl text-center"
                     >
-                      Pesan Sekarang
-                    </Link>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
+                        <motion.div variants={itemVariants}>
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-300">
+                                <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+                                Open Source Boilerplate
+                            </span>
+                        </motion.div>
 
-        {/* Partnership Section */}
-        <section id="kemitraan" className="relative py-32 px-4 sm:px-6 lg:px-8 bg-white">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Program Kemitraan</h2>
-              <div className="w-24 h-1 bg-blue-600 mx-auto mb-6"></div>
-            </motion.div>
+                        <motion.h1
+                            variants={itemVariants}
+                            className="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl"
+                        >
+                            Bangun Aplikasi{' '}
+                            <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                                Lebih Cepat
+                            </span>
+                        </motion.h1>
 
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="bg-gradient-to-br from-blue-600 to-cyan-600 rounded-3xl p-12 text-white shadow-2xl"
-            >
-              <div className="max-w-4xl mx-auto text-center space-y-6">
-                <h3 className="text-3xl md:text-4xl font-bold mb-6">
-                  Raih Potensi Keuntungan Besar dengan Kemitraan Ajib Darkah
-                </h3>
-                <p className="text-xl leading-relaxed">
-                  Kami membuka kesempatan kemitraan untuk distribusi air minum berkualitas. Raih potensi
-                  keuntungan besar dengan permintaan pasar yang terus meningkat, modal terjangkau, serta
-                  dukungan pemasaran dan operasional.
-                </p>
-                <p className="text-xl leading-relaxed">
-                  Tidak hanya bisnis yang menguntungkan, tetapi juga membawa keberkahan dengan menyediakan
-                  air minum sehat bagi masyarakat.
-                </p>
-                <Link
-                  href="/order?type=partnership"
-                  className="inline-block bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all shadow-xl hover:shadow-2xl mt-8"
-                >
-                  Gabung Kemitraan Ajib Darkah
-                </Link>
-              </div>
-            </motion.div>
-          </div>
-        </section>
+                        <motion.p
+                            variants={itemVariants}
+                            className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-gray-600 dark:text-gray-400"
+                        >
+                            Boilerplate siap pakai dengan Laravel, Inertia.js, dan React.
+                            Lengkap dengan autentikasi, manajemen role, menu dinamis, dan tema gelap.
+                        </motion.p>
 
-        {/* Footer */}
-        <footer className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid md:grid-cols-4 gap-8 mb-8">
-              <div>
-                <img
-                  src="/AJIB-DARKAH-INDONESIA.png"
-                  alt="Ajib Darkah"
-                  className="h-12 w-auto mb-4"
-                />
-                <p className="text-gray-400">
-                  Air minum pegunungan terbaik dari Cilacap sejak 2018
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Perusahaan</h4>
-                <ul className="space-y-2 text-gray-400">
-                  <li>
-                    <Link href="#tentang" className="hover:text-white transition">
-                      Tentang Kami
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="#produk" className="hover:text-white transition">
-                      Produk
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="#kemitraan" className="hover:text-white transition">
-                      Kemitraan
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Layanan</h4>
-                <ul className="space-y-2 text-gray-400">
-                  <li>
-                    <Link href="/order" className="hover:text-white transition">
-                      Pemesanan
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/order?type=partnership" className="hover:text-white transition">
-                      Daftar Kemitraan
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Kontak</h4>
-                <ul className="space-y-2 text-gray-400">
-                  <li>Email: info@ajibdarkah.com</li>
-                  <li>WhatsApp: +62 XXX XXX XXX</li>
-                </ul>
-              </div>
+                        <motion.div variants={itemVariants} className="mt-10 flex flex-wrap items-center justify-center gap-4">
+                            <Link
+                                href={route('login')}
+                                className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-200"
+                            >
+                                Mulai Sekarang
+                            </Link>
+                            <a
+                                href="#fitur"
+                                className="group flex items-center gap-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-600 transition-all duration-200"
+                            >
+                                Lihat Fitur
+                                <svg className="h-4 w-4 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                </svg>
+                            </a>
+                        </motion.div>
+                    </motion.div>
+                </section>
+
+                {/* Tech Stack Section */}
+                <section className="relative py-16 px-6 border-t border-gray-100 dark:border-gray-800/60">
+                    <div className="mx-auto max-w-6xl">
+                        <motion.p
+                            initial={{ opacity: 0 }}
+                            whileInView={{ opacity: 1 }}
+                            viewport={{ once: true }}
+                            className="text-center text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-10"
+                        >
+                            Dibangun dengan teknologi modern
+                        </motion.p>
+                        <div className="flex flex-wrap items-center justify-center gap-6">
+                            {techStack.map((tech, i) => (
+                                <motion.div
+                                    key={tech.name}
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.3, delay: i * 0.05 }}
+                                    className="flex items-center gap-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 shadow-sm"
+                                >
+                                    <span className="text-xl">{tech.icon}</span>
+                                    <div>
+                                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{tech.name}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">{tech.version}</p>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Features Section */}
+                <section id="fitur" className="relative py-24 px-6 bg-gray-50 dark:bg-gray-900/50">
+                    <div className="mx-auto max-w-6xl">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5 }}
+                            className="text-center"
+                        >
+                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
+                                Fitur Lengkap Siap Pakai
+                            </h2>
+                            <p className="mx-auto mt-4 max-w-lg text-gray-600 dark:text-gray-400">
+                                Fokus pada bisnis Anda — infrastruktur sudah tersedia.
+                            </p>
+                        </motion.div>
+
+                        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            {features.map((feature, i) => (
+                                <motion.div
+                                    key={feature.title}
+                                    initial={{ opacity: 0, y: 24 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.4, delay: i * 0.08 }}
+                                    className="relative rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 hover:shadow-md dark:hover:shadow-gray-900/50 transition-shadow"
+                                >
+                                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                                        {feature.icon}
+                                    </div>
+                                    <h3 className="mt-4 text-base font-semibold text-gray-900 dark:text-white">
+                                        {feature.title}
+                                    </h3>
+                                    <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                                        {feature.description}
+                                    </p>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Footer */}
+                <footer className="border-t border-gray-200 dark:border-gray-800 py-8 px-6">
+                    <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+                        &copy; {new Date().getFullYear()} Your Company Name. All rights reserved.
+                    </p>
+                </footer>
             </div>
-            <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-              <p>Copyright © {new Date().getFullYear()} Ajib Darkah Indonesia. All rights reserved.</p>
-            </div>
-          </div>
-        </footer>
-      </div>
-    </>
-  );
+        </>
+    );
 }
+
+const techStack = [
+    { name: 'Laravel', version: 'v11', icon: '🔴' },
+    { name: 'React', version: 'v19', icon: '⚛️' },
+    { name: 'Inertia.js', version: 'v2', icon: '🔗' },
+    { name: 'TypeScript', version: 'v5', icon: '🔷' },
+    { name: 'Tailwind CSS', version: 'v3', icon: '🎨' },
+    { name: 'Framer Motion', version: 'v12', icon: '🎞️' },
+    { name: 'Spatie Permission', version: 'v6', icon: '🛡️' },
+    { name: 'Vite', version: 'v6', icon: '⚡' },
+];
+
+const features = [
+    {
+        title: 'Autentikasi',
+        description: 'Login, register, dan manajemen profil pengguna sudah siap digunakan.',
+        icon: (
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+        ),
+    },
+    {
+        title: 'Role & Permission',
+        description: 'Kelola hak akses pengguna dengan sistem role dan permission yang fleksibel.',
+        icon: (
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+        ),
+    },
+    {
+        title: 'Menu Dinamis',
+        description: 'Sidebar dan navigasi mobile yang otomatis menyesuaikan dengan role pengguna.',
+        icon: (
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        ),
+    },
+    {
+        title: 'Dark Mode',
+        description: 'Tema gelap dan terang dengan toggle, preferensi tersimpan otomatis.',
+        icon: (
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+        ),
+    },
+    {
+        title: 'DataTable',
+        description: 'Komponen tabel server-side dengan pencarian, sorting, dan pagination.',
+        icon: (
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+        ),
+    },
+    {
+        title: 'Notifikasi',
+        description: 'Sistem notifikasi toast dan in-app notification yang sudah terintegrasi.',
+        icon: (
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+        ),
+    },
+];
 

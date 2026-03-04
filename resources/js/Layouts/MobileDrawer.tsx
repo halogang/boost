@@ -24,7 +24,7 @@ function LogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200"
+      className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200"
     >
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -137,6 +137,8 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
     onClose();
   };
 
+  const getLevelPadding = (level: number) => `${16 + level * 16}px`;
+
   const renderMenuItem = (menu: NavigationMenuItem, level: number = 0) => {
     const hasChildren = menu.children && menu.children.length > 0;
     const isExpanded = expandedMenus.includes(menu.id);
@@ -146,20 +148,22 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
 
     if (hasChildren) {
       return (
-        <div key={menu.id} className={cn(level > 0 && 'ml-2')}>
+        <div key={menu.id}>
           <button
             onClick={() => !isDisabled && toggleSubmenu(menu.id)}
             disabled={isDisabled}
             className={cn(
-              'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200',
+              'w-full flex items-center gap-3 py-2.5 pr-3 transition-all duration-200',
               isDisabled && 'opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-500',
-              !isDisabled && !hasActive && 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-primary-400'
+              !isDisabled && 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-primary-400'
             )}
-            style={(hasActive || isExpanded) && !isDisabled ? {
-              backgroundColor: primaryColor,
-              color: textColor,
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-            } : undefined}
+            style={{
+              paddingLeft: getLevelPadding(level),
+              ...(hasActive && !isExpanded && !isDisabled ? {
+                backgroundColor: primaryColor,
+                color: textColor,
+              } : {}),
+            }}
           >
             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIconSvg(menu.icon || 'home')} />
@@ -186,7 +190,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
           </button>
 
           {isExpanded && (
-            <div className="mt-1 ml-4 pl-3 border-l-2 border-primary-200 dark:border-primary-800 space-y-1">
+            <div className="mt-0.5 space-y-0.5">
               {menu.children?.map((child) => renderMenuItem(child, level + 1))}
             </div>
           )}
@@ -201,14 +205,16 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
           href={route(menu.route)}
           onClick={handleLinkClick}
           className={cn(
-            'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200',
+            'flex items-center gap-3 py-2.5 pr-3 transition-all duration-200',
             !active && 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-primary-400'
           )}
-          style={active ? {
-            backgroundColor: primaryColor,
-            color: textColor,
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-          } : undefined}
+          style={{
+            paddingLeft: getLevelPadding(level),
+            ...(active ? {
+              backgroundColor: primaryColor,
+              color: textColor,
+            } : {}),
+          }}
         >
           <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIconSvg(menu.icon || 'home')} />
@@ -222,7 +228,8 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
       return (
         <div
           key={menu.id}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-500"
+          className="flex items-center gap-3 py-2.5 pr-3 opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-500"
+          style={{ paddingLeft: getLevelPadding(level) }}
         >
           <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIconSvg(menu.icon || 'home')} />
@@ -259,15 +266,13 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
         <div className="p-5 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-br from-primary-50 to-white dark:from-gray-900 dark:to-gray-900 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center shadow-md">
-              <img
-                src="/AJIB-DARKAH-INDONESIA.png"
-                alt="Ajib Darkah Indonesia"
-                className="w-10 h-10 object-contain"
-              />
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4v10" />
+              </svg>
             </div>
             <div>
-              <h2 className="font-bold text-base text-gray-900 dark:text-white">Ajib Darkah</h2>
-              <p className="text-xs text-gray-600 dark:text-gray-400">Delivery System</p>
+              <h2 className="font-bold text-base text-gray-900 dark:text-white">App Name</h2>
+              <p className="text-xs text-gray-600 dark:text-gray-400">Management System</p>
             </div>
           </div>
           
@@ -292,7 +297,7 @@ export default function MobileDrawer({ isOpen, onClose, menus }: MobileDrawerPro
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-3 overflow-y-auto space-y-1">
+        <nav className="flex-1 py-2 overflow-y-auto space-y-0.5">
           {menus.map((menu) => renderMenuItem(menu))}
         </nav>
 
